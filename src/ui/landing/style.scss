@@ -1,0 +1,22 @@
+#landing-page {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+
+    #landing-page-icon {
+        width: 96px;
+        height: 96px;
+        &,
+        * {
+            fill: var(--mantine-primary-color-1) !important;
+        }
+    }
+
+    #landing-page-menu {
+        max-width: 384px;
+        width: 90vw;
+    }
+}

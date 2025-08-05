@@ -9,12 +9,17 @@ import "@gfazioli/mantine-split-pane/styles.css";
 import { LocalizationProvider } from "./localization";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { LayoutView } from "./ui/layout/Layout";
+import { LandingPage } from "./ui/landing/LandingPage";
+import { Wrapper } from "./ui/Wrapper";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <LocalizationProvider>
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<LayoutView />}></Route>
+                <Route path="/" element={<Wrapper />}>
+                    <Route index element={<LandingPage />} />
+                    <Route path="/project" element={<LayoutView />}></Route>
+                </Route>
             </Routes>
         </BrowserRouter>
     </LocalizationProvider>

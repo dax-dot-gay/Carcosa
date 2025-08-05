@@ -1,6 +1,7 @@
 {
   "app": {
-    "name": "Carcosa"
+    "name": "Carcosa",
+    "subtitle": "Eldritch Worldbuilding"
   },
   "menu": {
     "project": {
@@ -12,5 +13,20 @@
     "file": {
       "button": "File"
     }
+  },
+  "landing": {
+    "new": {
+      "button": "New Project"
+    },
+    "open": {
+      "button": "Open Project"
+    },
+    "settings": {
+      "button": "Settings"
+    }
+  },
+  "dialogs": {
+    "openProject": "Select Project Folder",
+    "createProject": "Create New Project Folder"
   }
 }

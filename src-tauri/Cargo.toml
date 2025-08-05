@@ -31,4 +31,7 @@ tauri-plugin-fs = "2"
 tauri-plugin-persisted-scope = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-os = "2"
+strum = { version = "0.27.2", features = ["derive"] }
+parking_lot = { version = "0.12.4", features = ["arc_lock", "serde", "send_guard"] }
+uuid = { version = "1.17.0", features = ["v4", "fast-rng", "serde"] }
 
