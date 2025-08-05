@@ -1,0 +1,16 @@
+{
+  "app": {
+    "name": "Carcosa"
+  },
+  "menu": {
+    "project": {
+      "button": "Project"
+    },
+    "tools": {
+      "button": "Tools"
+    },
+    "file": {
+      "button": "File"
+    }
+  }
+}

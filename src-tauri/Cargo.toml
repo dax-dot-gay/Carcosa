@@ -26,4 +26,9 @@ tokio = { version = "1.47.1", features = ["full"] }
 taurpc = "0.5.1"
 specta = { version = "=2.0.0-rc.22", features = ["derive"] }
 native_db = "0.8.2"
+tauri-plugin-store = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-persisted-scope = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-os = "2"
 
