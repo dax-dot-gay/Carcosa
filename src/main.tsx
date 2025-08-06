@@ -11,6 +11,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { LayoutView } from "./ui/layout/Layout";
 import { LandingPage } from "./ui/landing/LandingPage";
 import { Wrapper } from "./ui/Wrapper";
+import "@/theme/style.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <LocalizationProvider>

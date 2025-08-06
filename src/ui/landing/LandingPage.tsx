@@ -12,9 +12,19 @@ import AppIcon from "@/assets/icon.svg?react";
 import { useTranslation } from "react-i18next";
 import { TbFolderOpen, TbPlus, TbSettingsFilled } from "react-icons/tb";
 import { open } from "@tauri-apps/plugin-dialog";
+import { useModals } from "@/modals";
+import api, { SerializableError } from "@/api";
+import { useNavigate } from "react-router";
+import { useDisclosure } from "@mantine/hooks";
+import { useNotifications } from "@/notifications";
 
 export function LandingPage() {
     const { t } = useTranslation();
+    const { createProject } = useModals();
+    const nav = useNavigate();
+    const [loading, { open: startLoading, close: stopLoading }] =
+        useDisclosure(false);
+    const { error } = useNotifications();
     return (
         <Center id="landing-page">
             <Stack gap="xl" justify="center" align="center">
@@ -33,33 +43,53 @@ export function LandingPage() {
                     <Button
                         leftSection={<TbPlus size={20} />}
                         justify="space-between"
-                        onClick={() =>
-                            open({
-                                canCreateDirectories: true,
-                                directory: true,
-                                recursive: true,
-                                title: t("dialogs.createProject"),
-                            }).then(console.log)
-                        }
+                        loading={loading}
+                        onClick={() => createProject({})}
                     >
                         {t("landing.new.button")}
                     </Button>
                     <Button
+                        loading={loading}
                         leftSection={<TbFolderOpen size={20} />}
                         justify="space-between"
-                        onClick={() =>
+                        onClick={() => {
+                            startLoading();
                             open({
-                                canCreateDirectories: true,
+                                canCreateDirectories: false,
                                 directory: true,
                                 recursive: true,
                                 title: t("dialogs.openProject"),
-                            }).then(console.log)
-                        }
+                                defaultPath: ".",
+                            }).then((path) => {
+                                if (path !== null) {
+                                    api.application
+                                        .open_project(path)
+                                        .then(() => {
+                                            nav("/project");
+                                            stopLoading();
+                                        })
+                                        .catch((e: SerializableError) => {
+                                            stopLoading();
+                                            error(
+                                                `Error code <${e.err}>: ${
+                                                    e.err ===
+                                                    "no_active_project"
+                                                        ? "No project currently active."
+                                                        : e.context
+                                                }`
+                                            );
+                                        });
+                                } else {
+                                    stopLoading();
+                                }
+                            });
+                        }}
                     >
                         {t("landing.open.button")}
                     </Button>
                     <Divider opacity={0.2} />
                     <Button
+                        loading={loading}
                         leftSection={<TbSettingsFilled size={20} />}
                         justify="space-between"
                         variant="light"

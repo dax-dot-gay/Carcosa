@@ -28,5 +28,36 @@
   "dialogs": {
     "openProject": "Select Project Folder",
     "createProject": "Create New Project Folder"
+  },
+  "modals": {
+    "createProject": {
+      "title": "Create New Project",
+      "path": {
+        "label": "Select project folder",
+        "placeholder": "Click to select..."
+      },
+      "name": {
+        "label": "Project name"
+      },
+      "description": {
+        "label": "Project Description"
+      },
+      "success": "Created project successfully!"
+    }
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "create": "Create"
+  },
+  "errors": {
+    "form": {
+      "empty": "Please fill out this field!"
+    }
+  },
+  "common": {
+    "notif": {
+      "success": "Success!",
+      "error": "Error:"
+    }
   }
 }

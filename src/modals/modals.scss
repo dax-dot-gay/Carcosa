@@ -1,0 +1,15 @@
+.modal-create_project {
+    .create-path {
+        .mantine-Input-wrapper {
+            cursor: pointer !important;
+
+            input {
+                cursor: pointer !important;
+
+                &:hover {
+                    --input-bd: var(--input-bd-focus);
+                }
+            }
+        }
+    }
+}

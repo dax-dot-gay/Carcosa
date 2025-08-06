@@ -6,7 +6,6 @@ import {
     Button,
     Divider,
     Group,
-    MantineProvider,
 } from "@mantine/core";
 import "./style.scss";
 import {

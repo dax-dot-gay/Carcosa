@@ -24,7 +24,7 @@ serde = { version = "1.0.219", features = ["derive"] }
 tauri = { version = "2", features = [] }
 tokio = { version = "1.47.1", features = ["full"] }
 taurpc = "0.5.1"
-specta = { version = "=2.0.0-rc.22", features = ["derive"] }
+specta = { version = "=2.0.0-rc.22", features = ["derive", "uuid", "tokio", "chrono"] }
 native_db = "0.8.2"
 tauri-plugin-store = "2"
 tauri-plugin-fs = "2"
@@ -34,4 +34,12 @@ tauri-plugin-os = "2"
 strum = { version = "0.27.2", features = ["derive"] }
 parking_lot = { version = "0.12.4", features = ["arc_lock", "serde", "send_guard"] }
 uuid = { version = "1.17.0", features = ["v4", "fast-rng", "serde"] }
+thiserror = "2.0.12"
+anyhow = "1.0.98"
+native_model = "=0.4.20"
+once_cell = { version = "1.21.3", features = ["parking_lot"] }
+async-trait = "0.1.88"
+serde_json = "1.0.142"
+specta-typescript = "0.0.9"
+paste = "1.0.15"
 
