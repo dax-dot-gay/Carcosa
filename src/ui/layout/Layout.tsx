@@ -7,16 +7,24 @@ import {
     Divider,
     Group,
     Menu,
+    Stack,
+    Tabs,
+    Text,
 } from "@mantine/core";
 import "./style.scss";
 import {
     TbFolder,
     TbFolderOpen,
+    TbListTree,
     TbLogout2,
     TbMaximize,
     TbMinimize,
     TbNotebook,
+    TbPackage,
     TbPlus,
+    TbSettingsFilled,
+    TbTagsFilled,
+    TbTemplate,
     TbTools,
     TbX,
 } from "react-icons/tb";
@@ -128,16 +136,46 @@ export function LayoutView() {
                             </Menu.Dropdown>
                         </Menu>
 
-                        <Button
-                            radius={0}
-                            className="header-button"
-                            leftSection={<TbNotebook size={18} />}
-                            variant="subtle"
-                            color="gray"
-                            size="sm"
-                        >
-                            {t("menu.project.button")}
-                        </Button>
+                        <Menu shadow="sm" position="bottom-start">
+                            <Menu.Target>
+                                <Button
+                                    radius={0}
+                                    className="header-button"
+                                    leftSection={<TbNotebook size={18} />}
+                                    variant="subtle"
+                                    color="gray"
+                                    size="sm"
+                                >
+                                    {t("menu.project.button")}
+                                </Button>
+                            </Menu.Target>
+                            <Menu.Dropdown>
+                                <Menu.Item
+                                    leftSection={<TbSettingsFilled size={16} />}
+                                >
+                                    {t("menu.project.settings")}
+                                </Menu.Item>
+                                <Menu.Divider />
+                                <Menu.Label>
+                                    {t("menu.project.resources")}
+                                </Menu.Label>
+                                <Menu.Item
+                                    leftSection={<TbTemplate size={16} />}
+                                >
+                                    {t("menu.project.templates")}
+                                </Menu.Item>
+                                <Menu.Item
+                                    leftSection={<TbTagsFilled size={16} />}
+                                >
+                                    {t("menu.project.categories")}
+                                </Menu.Item>
+                                <Menu.Item
+                                    leftSection={<TbPackage size={16} />}
+                                >
+                                    {t("menu.project.packs")}
+                                </Menu.Item>
+                            </Menu.Dropdown>
+                        </Menu>
                         <Button
                             radius={0}
                             className="header-button"
@@ -185,7 +223,7 @@ export function LayoutView() {
             <AppShell.Main id="app-main">
                 <Split className="app-split">
                     <Split.Pane minWidth={150} maxWidth={600}>
-                        <Box id="nav-pane" p="sm"></Box>
+                        <Stack gap={0} p={0} id="nav-pane"></Stack>
                     </Split.Pane>
                     <Split.Resizer
                         className="app-split-handle"

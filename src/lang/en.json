@@ -5,7 +5,12 @@
   },
   "menu": {
     "project": {
-      "button": "Project"
+      "button": "Project",
+      "templates": "Templates",
+      "categories": "Categories",
+      "packs": "Packages",
+      "resources": "Manage Resources",
+      "settings": "Project Settings"
     },
     "tools": {
       "button": "Tools"
