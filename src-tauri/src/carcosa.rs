@@ -6,7 +6,7 @@ use serde_json::{ from_value, to_value };
 use tauri::{ AppHandle, Manager, Runtime };
 use tauri_plugin_store::{ Store, StoreExt };
 
-use crate::models::MODELS;
+use crate::{api::Events, models::MODELS};
 
 pub trait CarcosaExt<R: Runtime> {
     fn carcosa(&self) -> Carcosa<R>;
@@ -27,9 +27,8 @@ impl<R: Runtime> Carcosa<R> {
     pub fn app_state(&self) -> Arc<Store<R>> {
         self.app_handle()
             .store_builder("state.json")
-            .auto_save(Duration::from_secs(5))
+            .auto_save(Duration::from_secs_f64(0.2))
             .default("current_project", None::<String>)
-            .default("reopen", false)
             .build()
             .expect("Failed to retrieve application state store.")
     }
@@ -88,6 +87,10 @@ impl<R: Runtime> Carcosa<R> {
 
             Err(crate::Error::NoActiveProject)
         }
+    }
+
+    pub fn events(&self) -> Events<R> {
+        Events::new(self.app_handle().clone())
     }
 }
 

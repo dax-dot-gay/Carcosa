@@ -17,6 +17,7 @@ pub enum Error {
     #[error("No project is currently active!")] NoActiveProject,
     #[error("Invalid project selected at path {0}")] InvalidProjectSelection(String),
     #[error("Corrupted project at path {0}: {1}")] CorruptedProject(String, String),
+    #[error("Internal tauri error: {0:?}")] TauriError(Arc<tauri::Error>)
 }
 
 impl From<anyhow::Error> for Error {
@@ -43,6 +44,12 @@ impl From<native_db::db_type::Error> for Error {
     }
 }
 
+impl From<tauri::Error> for Error {
+    fn from(value: tauri::Error) -> Self {
+        Self::TauriError(Arc::new(value))
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, Type)]
 #[serde(tag = "err", content = "context", rename_all = "snake_case")]
 pub enum SerializableError {
@@ -55,6 +62,7 @@ pub enum SerializableError {
     NoActiveProject,
     InvalidProjectSelection(String),
     CorruptedProject(String),
+    TauriError(String)
 }
 
 impl<T: Into<Error>> From<T> for SerializableError {
@@ -69,9 +77,10 @@ impl<T: Into<Error>> From<T> for SerializableError {
             Error::NoActiveProject => Self::NoActiveProject,
             Error::InvalidProjectSelection(path) => Self::InvalidProjectSelection(path),
             Error::CorruptedProject(path, reason) =>
-                Self::CorruptedProject(
-                    format!("The project at path {path} is corrupted: {reason}")
-                ),
+                        Self::CorruptedProject(
+                            format!("The project at path {path} is corrupted: {reason}")
+                        ),
+            Error::TauriError(error) => Self::TauriError(error.to_string()),
         }
     }
 }

@@ -25,6 +25,7 @@ export function LandingPage() {
     const [loading, { open: startLoading, close: stopLoading }] =
         useDisclosure(false);
     const { error } = useNotifications();
+
     return (
         <Center id="landing-page">
             <Stack gap="xl" justify="center" align="center">
@@ -65,7 +66,6 @@ export function LandingPage() {
                                     api.application
                                         .open_project(path)
                                         .then(() => {
-                                            nav("/project");
                                             stopLoading();
                                         })
                                         .catch((e: SerializableError) => {

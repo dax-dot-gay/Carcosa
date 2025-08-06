@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-
 use tauri::Runtime;
 use tokio::fs;
 
@@ -14,10 +13,19 @@ pub struct CreateProjectModel {
     pub description: Option<String>
 }
 
-#[taurpc::procedures(path = "application")]
+#[taurpc::procedures(path = "application", event_trigger = ApplicationEventTrigger)]
 pub trait ApplicationApi {
     async fn create_project<R: Runtime>(app_handle: tauri::AppHandle<R>, project: CreateProjectModel) -> Result<ProjectConfiguration, crate::SerializableError>;
     async fn open_project<R: Runtime>(app_handle: tauri::AppHandle<R>, path: String) -> Result<ProjectConfiguration, crate::SerializableError>;
+    async fn exit_project<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<(), crate::SerializableError>;
+    async fn project_config<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<ProjectConfiguration, crate::SerializableError>;
+    async fn project_directory<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Option<String>;
+
+    #[taurpc(event)]
+    async fn opened_project(path: String, config: ProjectConfiguration);
+
+    #[taurpc(event)]
+    async fn closed_project();
 }
 
 #[derive(Clone)]
@@ -39,12 +47,13 @@ impl ApplicationApi for ApplicationApiImpl {
         }
 
         fs::create_dir_all(path).await?;
-        carcosa.set_state("current_project", project.path.clone())?;
+        carcosa.set_state("current_project", Some(project.path.clone()))?;
         let database = carcosa.current_database()?;
         let txn = database.rw_transaction()?;
         let config = ProjectConfiguration::new(project.name.clone(), project.description.clone());
         txn.insert(config.clone())?;
         txn.commit()?;
+        app_handle.carcosa().events().application().opened_project(project.path.clone(), config.clone())?;
 
         Ok(config)
     }
@@ -60,13 +69,34 @@ impl ApplicationApi for ApplicationApiImpl {
             return Err(crate::Error::InvalidProjectSelection(path).into());
         }
 
-        carcosa.set_state("current_project", path.clone())?;
+        carcosa.set_state("current_project", Some(path.clone()))?;
         let db = carcosa.current_database()?;
         let txn = db.r_transaction()?;
         if let Some(config) = txn.get().primary::<ProjectConfiguration>("CONFIG")? {
+            app_handle.carcosa().events().application().opened_project(path.clone(), config.clone())?;
             Ok(config)
         } else {
             Err(crate::Error::CorruptedProject(path, "Missing project configuration in database.".into()).into())
         }
+    }
+
+    async fn exit_project<R: Runtime>(self, app_handle: tauri::AppHandle<R>) -> Result<(), crate::SerializableError> {
+        app_handle.carcosa().set_state("current_project", None::<String>)?;
+        app_handle.carcosa().events().application().closed_project()?;
+        Ok(())
+    }
+
+    async fn project_config<R: Runtime>(self, app_handle: tauri::AppHandle<R>) -> Result<ProjectConfiguration, crate::SerializableError> {
+        let db = app_handle.carcosa().current_database()?;
+        let txn = db.r_transaction()?;
+        if let Some(config) = txn.get().primary::<ProjectConfiguration>("CONFIG")? {
+            Ok(config)
+        } else {
+            Err(crate::Error::CorruptedProject(app_handle.carcosa().current_project_directory().unwrap().to_string_lossy().to_string(), "Missing project configuration in database.".into()).into())
+        }
+    }
+
+    async fn project_directory<R: Runtime>(self, app_handle: tauri::AppHandle<R>) -> Option<String> {
+        app_handle.carcosa().current_project_directory().and_then(|v| Some(v.to_string_lossy().to_string()))
     }
 }

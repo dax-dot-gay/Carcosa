@@ -10,11 +10,16 @@ export type CreateProjectModel = { path: string; name: string; description?: str
 
 export type ProjectConfiguration = { name: string; description?: string | null; current_tabs?: string[]; created_on: string; last_access: string }
 
-export type SerializableError = { err: "unhandled"; context: string } | { err: "io"; context: string } | { err: "non_empty_project_folder"; context: string } | { err: "expected_project_directory"; context: string } | { err: "json_encoding"; context: string } | { err: "database_error"; context: string } | { err: "no_active_project" } | { err: "invalid_project_selection"; context: string } | { err: "corrupted_project"; context: string }
+export type SerializableError = { err: "unhandled"; context: string } | { err: "io"; context: string } | { err: "non_empty_project_folder"; context: string } | { err: "expected_project_directory"; context: string } | { err: "json_encoding"; context: string } | { err: "database_error"; context: string } | { err: "no_active_project" } | { err: "invalid_project_selection"; context: string } | { err: "corrupted_project"; context: string } | { err: "tauri_error"; context: string }
 
-const ARGS_MAP = { 'application':'{"create_project":["project"],"open_project":["path"]}' }
-export type Router = { "application": {create_project: (project: CreateProjectModel) => Promise<ProjectConfiguration>, 
-open_project: (path: string) => Promise<ProjectConfiguration>} };
+const ARGS_MAP = { 'application':'{"closed_project":[],"create_project":["project"],"exit_project":[],"open_project":["path"],"opened_project":["path","config"],"project_config":[],"project_directory":[]}' }
+export type Router = { "application": {closed_project: () => Promise<void>, 
+create_project: (project: CreateProjectModel) => Promise<ProjectConfiguration>, 
+exit_project: () => Promise<null>, 
+open_project: (path: string) => Promise<ProjectConfiguration>, 
+opened_project: (path: string, config: ProjectConfiguration) => Promise<void>, 
+project_config: () => Promise<ProjectConfiguration>, 
+project_directory: () => Promise<string | null>} };
 
 
 export const createTauRPCProxy = () => createProxy<Router>(ARGS_MAP)

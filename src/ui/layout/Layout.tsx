@@ -6,13 +6,17 @@ import {
     Button,
     Divider,
     Group,
+    Menu,
 } from "@mantine/core";
 import "./style.scss";
 import {
     TbFolder,
+    TbFolderOpen,
+    TbLogout2,
     TbMaximize,
     TbMinimize,
     TbNotebook,
+    TbPlus,
     TbTools,
     TbX,
 } from "react-icons/tb";
@@ -20,9 +24,17 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import AppIcon from "@/assets/icon.svg?react";
 import { useTranslation } from "react-i18next";
 import { Split } from "@gfazioli/mantine-split-pane";
-import { Outlet } from "react-router";
+import { Outlet, useNavigate } from "react-router";
+import { useModals } from "@/modals";
+import { open } from "@tauri-apps/plugin-dialog";
+import api, { SerializableError } from "@/api";
+import { useNotifications } from "@/notifications";
+
 export function LayoutView() {
     const { t } = useTranslation();
+    const { createProject } = useModals();
+    const nav = useNavigate();
+    const { error } = useNotifications();
 
     return (
         <AppShell
@@ -46,16 +58,76 @@ export function LayoutView() {
                             orientation="vertical"
                             className="header-divider"
                         />
-                        <Button
-                            radius={0}
-                            className="header-button"
-                            leftSection={<TbFolder size={18} />}
-                            variant="subtle"
-                            color="gray"
-                            size="sm"
-                        >
-                            {t("menu.file.button")}
-                        </Button>
+                        <Menu shadow="sm" position="bottom-start">
+                            <Menu.Target>
+                                <Button
+                                    radius={0}
+                                    className="header-button"
+                                    leftSection={<TbFolder size={18} />}
+                                    variant="subtle"
+                                    color="gray"
+                                    size="sm"
+                                >
+                                    {t("menu.file.button")}
+                                </Button>
+                            </Menu.Target>
+                            <Menu.Dropdown>
+                                <Menu.Item
+                                    leftSection={<TbPlus size={16} />}
+                                    onClick={() => {
+                                        nav("/");
+                                        createProject({});
+                                    }}
+                                >
+                                    {t("menu.file.create")}
+                                </Menu.Item>
+                                <Menu.Item
+                                    leftSection={<TbFolderOpen size={16} />}
+                                    onClick={() => {
+                                        nav("/");
+                                        open({
+                                            canCreateDirectories: false,
+                                            directory: true,
+                                            recursive: true,
+                                            title: t("dialogs.openProject"),
+                                            defaultPath: ".",
+                                        }).then((path) => {
+                                            if (path !== null) {
+                                                api.application
+                                                    .open_project(path)
+                                                    .catch(
+                                                        (
+                                                            e: SerializableError
+                                                        ) => {
+                                                            error(
+                                                                `Error code <${
+                                                                    e.err
+                                                                }>: ${
+                                                                    e.err ===
+                                                                    "no_active_project"
+                                                                        ? "No project currently active."
+                                                                        : e.context
+                                                                }`
+                                                            );
+                                                        }
+                                                    );
+                                            }
+                                        });
+                                    }}
+                                >
+                                    {t("menu.file.open")}
+                                </Menu.Item>
+                                <Menu.Item
+                                    leftSection={<TbLogout2 size={16} />}
+                                    onClick={() =>
+                                        api.application.exit_project()
+                                    }
+                                >
+                                    {t("menu.file.exit")}
+                                </Menu.Item>
+                            </Menu.Dropdown>
+                        </Menu>
+
                         <Button
                             radius={0}
                             className="header-button"

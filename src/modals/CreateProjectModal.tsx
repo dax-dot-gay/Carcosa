@@ -56,7 +56,6 @@ const openCreateProjectModal = createModalOpener({
                         .then((_) => {
                             success(t("modals.createProject.success"));
                             modals.closeAll();
-                            nav("/project");
                             stopLoading();
                         })
                         .catch((e: SerializableError) => {

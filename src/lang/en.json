@@ -11,7 +11,10 @@
       "button": "Tools"
     },
     "file": {
-      "button": "File"
+      "button": "File",
+      "create": "New Project",
+      "open": "Open Project",
+      "exit": "Exit Project"
     }
   },
   "landing": {
