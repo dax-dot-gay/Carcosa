@@ -12,16 +12,19 @@ import { LayoutView } from "./ui/layout/Layout";
 import { LandingPage } from "./ui/landing/LandingPage";
 import { Wrapper } from "./ui/Wrapper";
 import "@/theme/style.css";
+import { InitProvider } from "./context/init/InitProvider";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <LocalizationProvider>
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Wrapper />}>
-                    <Route index element={<LandingPage />} />
-                    <Route path="/project" element={<LayoutView />}></Route>
-                </Route>
-            </Routes>
-        </BrowserRouter>
+        <InitProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Wrapper />}>
+                        <Route index element={<LandingPage />} />
+                        <Route path="/project" element={<LayoutView />}></Route>
+                    </Route>
+                </Routes>
+            </BrowserRouter>
+        </InitProvider>
     </LocalizationProvider>
 );

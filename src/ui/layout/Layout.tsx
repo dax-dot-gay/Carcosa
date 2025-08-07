@@ -8,14 +8,11 @@ import {
     Group,
     Menu,
     Stack,
-    Tabs,
-    Text,
 } from "@mantine/core";
 import "./style.scss";
 import {
     TbFolder,
     TbFolderOpen,
-    TbListTree,
     TbLogout2,
     TbMaximize,
     TbMinimize,
@@ -23,7 +20,6 @@ import {
     TbPackage,
     TbPlus,
     TbSettingsFilled,
-    TbTagsFilled,
     TbTemplate,
     TbTools,
     TbX,
@@ -37,12 +33,14 @@ import { useModals } from "@/modals";
 import { open } from "@tauri-apps/plugin-dialog";
 import api, { SerializableError } from "@/api";
 import { useNotifications } from "@/notifications";
+import { usePersistedState } from "@/context/init";
 
 export function LayoutView() {
     const { t } = useTranslation();
     const { createProject } = useModals();
     const nav = useNavigate();
     const { error } = useNotifications();
+    const [sidebarWidth, setSidebarWidth] = usePersistedState("sidebar_width");
 
     return (
         <AppShell
@@ -165,11 +163,6 @@ export function LayoutView() {
                                     {t("menu.project.templates")}
                                 </Menu.Item>
                                 <Menu.Item
-                                    leftSection={<TbTagsFilled size={16} />}
-                                >
-                                    {t("menu.project.categories")}
-                                </Menu.Item>
-                                <Menu.Item
                                     leftSection={<TbPackage size={16} />}
                                 >
                                     {t("menu.project.packs")}
@@ -222,7 +215,14 @@ export function LayoutView() {
             </AppShell.Header>
             <AppShell.Main id="app-main">
                 <Split className="app-split">
-                    <Split.Pane minWidth={150} maxWidth={600}>
+                    <Split.Pane
+                        minWidth={150}
+                        maxWidth={600}
+                        initialWidth={sidebarWidth}
+                        onResizeEnd={({ width }) =>
+                            setSidebarWidth(Number.parseInt(width.toFixed(0)))
+                        }
+                    >
                         <Stack gap={0} p={0} id="nav-pane"></Stack>
                     </Split.Pane>
                     <Split.Resizer

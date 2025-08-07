@@ -2,7 +2,11 @@ use std::path::PathBuf;
 use tauri::Runtime;
 use tokio::fs;
 
-use crate::{carcosa::CarcosaExt, models::ProjectConfiguration};
+use crate::{
+    carcosa::CarcosaExt,
+    models::ProjectConfiguration,
+    types::state::{ State, StateKey, StateValue },
+};
 
 #[taurpc::ipc_type]
 pub struct CreateProjectModel {
@@ -10,22 +14,44 @@ pub struct CreateProjectModel {
     pub name: String,
 
     #[serde(default)]
-    pub description: Option<String>
+    pub description: Option<String>,
 }
 
 #[taurpc::procedures(path = "application", event_trigger = ApplicationEventTrigger)]
 pub trait ApplicationApi {
-    async fn create_project<R: Runtime>(app_handle: tauri::AppHandle<R>, project: CreateProjectModel) -> Result<ProjectConfiguration, crate::SerializableError>;
-    async fn open_project<R: Runtime>(app_handle: tauri::AppHandle<R>, path: String) -> Result<ProjectConfiguration, crate::SerializableError>;
-    async fn exit_project<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<(), crate::SerializableError>;
-    async fn project_config<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<ProjectConfiguration, crate::SerializableError>;
+    async fn create_project<R: Runtime>(
+        app_handle: tauri::AppHandle<R>,
+        project: CreateProjectModel
+    ) -> Result<ProjectConfiguration, crate::SerializableError>;
+    async fn open_project<R: Runtime>(
+        app_handle: tauri::AppHandle<R>,
+        path: String
+    ) -> Result<ProjectConfiguration, crate::SerializableError>;
+    async fn exit_project<R: Runtime>(
+        app_handle: tauri::AppHandle<R>
+    ) -> Result<(), crate::SerializableError>;
+    async fn project_config<R: Runtime>(
+        app_handle: tauri::AppHandle<R>
+    ) -> Result<ProjectConfiguration, crate::SerializableError>;
     async fn project_directory<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Option<String>;
+    async fn get_state<R: Runtime>(
+        app_handle: tauri::AppHandle<R>,
+        key: StateKey
+    ) -> Result<Option<StateValue>, crate::SerializableError>;
+    async fn set_state<R: Runtime>(
+        app_handle: tauri::AppHandle<R>,
+        value: StateValue
+    ) -> Result<(), crate::SerializableError>;
+    async fn full_state<R: Runtime>(app_handle: tauri::AppHandle<R>) -> State;
 
     #[taurpc(event)]
     async fn opened_project(path: String, config: ProjectConfiguration);
 
     #[taurpc(event)]
     async fn closed_project();
+
+    #[taurpc(event)]
+    async fn updated_state(new_state: State);
 }
 
 #[derive(Clone)]
@@ -33,7 +59,11 @@ pub struct ApplicationApiImpl;
 
 #[taurpc::resolvers]
 impl ApplicationApi for ApplicationApiImpl {
-    async fn create_project<R: Runtime>(self, app_handle: tauri::AppHandle<R>, project: CreateProjectModel) -> Result<ProjectConfiguration, crate::SerializableError> {
+    async fn create_project<R: Runtime>(
+        self,
+        app_handle: tauri::AppHandle<R>,
+        project: CreateProjectModel
+    ) -> Result<ProjectConfiguration, crate::SerializableError> {
         let path = PathBuf::from(project.path.clone());
         let carcosa = app_handle.carcosa();
         if path.exists() {
@@ -47,18 +77,26 @@ impl ApplicationApi for ApplicationApiImpl {
         }
 
         fs::create_dir_all(path).await?;
-        carcosa.set_state("current_project", Some(project.path.clone()))?;
+        carcosa.set_state(StateValue::CurrentProject(Some(project.path.clone())))?;
         let database = carcosa.current_database()?;
         let txn = database.rw_transaction()?;
         let config = ProjectConfiguration::new(project.name.clone(), project.description.clone());
         txn.insert(config.clone())?;
         txn.commit()?;
-        app_handle.carcosa().events().application().opened_project(project.path.clone(), config.clone())?;
+        app_handle
+            .carcosa()
+            .events()
+            .application()
+            .opened_project(project.path.clone(), config.clone())?;
 
         Ok(config)
     }
 
-    async fn open_project<R: Runtime>(self, app_handle: tauri::AppHandle<R>, path: String) -> Result<ProjectConfiguration, crate::SerializableError> {
+    async fn open_project<R: Runtime>(
+        self,
+        app_handle: tauri::AppHandle<R>,
+        path: String
+    ) -> Result<ProjectConfiguration, crate::SerializableError> {
         let realpath = PathBuf::from(path.clone());
         let carcosa = app_handle.carcosa();
         if !realpath.is_dir() {
@@ -69,34 +107,87 @@ impl ApplicationApi for ApplicationApiImpl {
             return Err(crate::Error::InvalidProjectSelection(path).into());
         }
 
-        carcosa.set_state("current_project", Some(path.clone()))?;
+        carcosa.set_state(StateValue::CurrentProject(Some(path.clone())))?;
         let db = carcosa.current_database()?;
         let txn = db.r_transaction()?;
         if let Some(config) = txn.get().primary::<ProjectConfiguration>("CONFIG")? {
-            app_handle.carcosa().events().application().opened_project(path.clone(), config.clone())?;
+            app_handle
+                .carcosa()
+                .events()
+                .application()
+                .opened_project(path.clone(), config.clone())?;
             Ok(config)
         } else {
-            Err(crate::Error::CorruptedProject(path, "Missing project configuration in database.".into()).into())
+            Err(
+                crate::Error
+                    ::CorruptedProject(path, "Missing project configuration in database.".into())
+                    .into()
+            )
         }
     }
 
-    async fn exit_project<R: Runtime>(self, app_handle: tauri::AppHandle<R>) -> Result<(), crate::SerializableError> {
-        app_handle.carcosa().set_state("current_project", None::<String>)?;
+    async fn exit_project<R: Runtime>(
+        self,
+        app_handle: tauri::AppHandle<R>
+    ) -> Result<(), crate::SerializableError> {
+        app_handle.carcosa().set_state(StateValue::CurrentProject(None))?;
         app_handle.carcosa().events().application().closed_project()?;
         Ok(())
     }
 
-    async fn project_config<R: Runtime>(self, app_handle: tauri::AppHandle<R>) -> Result<ProjectConfiguration, crate::SerializableError> {
+    async fn project_config<R: Runtime>(
+        self,
+        app_handle: tauri::AppHandle<R>
+    ) -> Result<ProjectConfiguration, crate::SerializableError> {
         let db = app_handle.carcosa().current_database()?;
         let txn = db.r_transaction()?;
         if let Some(config) = txn.get().primary::<ProjectConfiguration>("CONFIG")? {
             Ok(config)
         } else {
-            Err(crate::Error::CorruptedProject(app_handle.carcosa().current_project_directory().unwrap().to_string_lossy().to_string(), "Missing project configuration in database.".into()).into())
+            Err(
+                crate::Error
+                    ::CorruptedProject(
+                        app_handle
+                            .carcosa()
+                            .current_project_directory()
+                            .unwrap()
+                            .to_string_lossy()
+                            .to_string(),
+                        "Missing project configuration in database.".into()
+                    )
+                    .into()
+            )
         }
     }
 
-    async fn project_directory<R: Runtime>(self, app_handle: tauri::AppHandle<R>) -> Option<String> {
-        app_handle.carcosa().current_project_directory().and_then(|v| Some(v.to_string_lossy().to_string()))
+    async fn project_directory<R: Runtime>(
+        self,
+        app_handle: tauri::AppHandle<R>
+    ) -> Option<String> {
+        app_handle
+            .carcosa()
+            .current_project_directory()
+            .and_then(|v| Some(v.to_string_lossy().to_string()))
+    }
+
+    async fn get_state<R: Runtime>(
+        self,
+        app_handle: tauri::AppHandle<R>,
+        key: StateKey
+    ) -> Result<Option<StateValue>, crate::SerializableError> {
+        Ok(app_handle.carcosa().get_state(key)?)
+    }
+    async fn set_state<R: Runtime>(
+        self,
+        app_handle: tauri::AppHandle<R>,
+        value: StateValue
+    ) -> Result<(), crate::SerializableError> {
+        let _ = app_handle.carcosa().set_state(value)?;
+        app_handle.carcosa().events().application().updated_state(app_handle.carcosa().full_state())?;
+        Ok(())
+    }
+
+    async fn full_state<R: Runtime>(self, app_handle: tauri::AppHandle<R>) -> State {
+        app_handle.carcosa().full_state()
     }
 }

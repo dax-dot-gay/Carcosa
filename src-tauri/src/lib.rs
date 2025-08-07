@@ -1,6 +1,7 @@
 pub mod api;
 pub mod models;
 pub mod carcosa;
+pub mod types;
 mod error;
 
 use std::sync::Arc;

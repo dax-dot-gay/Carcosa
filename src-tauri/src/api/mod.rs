@@ -10,10 +10,7 @@ pub fn router<R: Runtime>() -> Router<R> {
         .export_config(
             specta_typescript::Typescript
                 ::default()
-                .header("// My header\n\n")
-                // Make sure prettier is installed before using this.
-                // .formatter(specta_typescript::formatter::prettier)
-                .bigint(specta_typescript::BigIntExportBehavior::String)
+                .bigint(specta_typescript::BigIntExportBehavior::Number)
         )
         .merge(application::ApplicationApiImpl.into_handler())
 }

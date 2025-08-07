@@ -1,12 +1,12 @@
 use std::{ path::PathBuf, sync::Arc, time::Duration };
 use native_db::{ Builder, Database };
 use parking_lot::{ ArcRwLockUpgradableReadGuard, RawRwLock, RwLock };
-use serde::{ de::DeserializeOwned, Serialize };
-use serde_json::{ from_value, to_value };
+use serde::de::DeserializeOwned;
+use strum::IntoEnumIterator;
 use tauri::{ AppHandle, Manager, Runtime };
 use tauri_plugin_store::{ Store, StoreExt };
 
-use crate::{api::Events, models::MODELS};
+use crate::{api::Events, models::MODELS, types::state::{State, StateKey, StateValue}};
 
 pub trait CarcosaExt<R: Runtime> {
     fn carcosa(&self) -> Carcosa<R>;
@@ -29,29 +29,67 @@ impl<R: Runtime> Carcosa<R> {
             .store_builder("state.json")
             .auto_save(Duration::from_secs_f64(0.2))
             .default("current_project", None::<String>)
+            .default("color_scheme", "dark".to_string())
+            .default("sidebar_width", 300u64)
             .build()
             .expect("Failed to retrieve application state store.")
     }
 
-    pub fn set_state<V: Serialize>(&self, key: impl Into<String>, value: V) -> crate::Result<()> {
-        let value = to_value(value)?;
-        self.app_state().set(key, value);
+    pub fn set_state(&self, value: StateValue) -> crate::Result<()> {
+        let val = value.value()?;
+        self.app_state().set(value.key_name(), val);
+        self.events().application().updated_state(self.full_state())?;
         Ok(())
     }
 
-    pub fn get_state<V: DeserializeOwned>(
+    pub fn get_state(
         &self,
-        key: impl Into<String>
-    ) -> crate::Result<Option<V>> {
-        if let Some(val) = self.app_state().get(key.into()) {
-            Ok(Some(from_value::<V>(val)?))
+        key: StateKey
+    ) -> crate::Result<Option<StateValue>> {
+        if let Some(val) = self.app_state().get(key.key_name()) {
+            Ok(Some(StateValue::wrap(key, val)?))
         } else {
             Ok(None)
         }
     }
 
+    pub fn get_state_as<V: DeserializeOwned>(
+        &self,
+        key: StateKey
+    ) -> crate::Result<Option<V>> {
+        if let Some(value) = self.get_state(key)? {
+            Ok(Some(value.resolve()?))
+        } else {
+            Ok(None)
+        }
+    }
+
+    pub fn get_state_or(&self, key: StateKey, fallback: StateValue) -> StateValue {
+        self.get_state(key).unwrap_or(Some(fallback.clone())).unwrap_or(fallback)
+    }
+
+    pub fn get_state_as_or<V: DeserializeOwned>(
+        &self,
+        key: StateKey,
+        fallback: V
+    ) -> V {
+        if let Ok(opt_val) = self.get_state_as::<V>(key) {
+            if let Some(val) = opt_val {
+                val
+            } else {
+                fallback
+            }
+        } else {
+            fallback
+        }
+    }
+
+    pub fn full_state(&self) -> State {
+        State::from_iter(StateKey::iter().filter_map(|key| self.get_state(key).unwrap_or(None)))
+    }
+
     pub fn current_project_directory(&self) -> Option<PathBuf> {
-        self.get_state::<Option<PathBuf>>("current_project").unwrap_or(None).unwrap_or(None)
+        self.get_state_as_or(StateKey::CurrentProject, None)
     }
 
     pub fn current_database(
