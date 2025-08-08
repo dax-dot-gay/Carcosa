@@ -1,7 +1,8 @@
-use std::collections::HashMap;
+use std::{ collections::HashMap, ops::Deref, str::FromStr };
 use serde::{ Deserialize, Serialize };
 use serde_json::{ Number, Value };
 use specta::Type;
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 #[serde(rename_all = "snake_case", tag = "kind")]
@@ -19,6 +20,7 @@ pub enum ValueType {
         elements: Box<ValueType>,
     },
     Opaque {},
+    Identifier {},
 }
 
 impl ValueType {
@@ -44,11 +46,46 @@ impl ValueType {
                     _ => false,
                 }
             ValueType::Opaque {} => true,
+            ValueType::Identifier {} => {
+                if let Value::String(data) = value { Uuid::from_str(&data).is_ok() } else { false }
+            }
         }
     }
 
     pub fn resolve<T: FromValue>(&self, value: Value) -> crate::Result<T> {
         T::from_value(self.clone(), value)
+    }
+
+    pub fn boolean() -> Self {
+        Self::Boolean {}
+    }
+
+    pub fn number() -> Self {
+        Self::Number {}
+    }
+
+    pub fn string() -> Self {
+        Self::String {}
+    }
+
+    pub fn opaque() -> Self {
+        Self::Opaque {}
+    }
+
+    pub fn identifier() -> Self {
+        Self::Identifier {}
+    }
+
+    pub fn optional(contained: ValueType) -> Self {
+        Self::Optional { contained: Box::new(contained) }
+    }
+
+    pub fn array(element_type: ValueType) -> Self {
+        Self::Array { elements: Box::new(element_type) }
+    }
+
+    pub fn object(value_type: ValueType) -> Self {
+        Self::Object { elements: Box::new(value_type) }
     }
 }
 
@@ -179,5 +216,68 @@ impl FromValue for Value {
                 expected_type: String::from("opaque"),
             })
         }
+    }
+}
+
+impl FromValue for Identifier {
+    fn from_value(value_type: ValueType, value: Value) -> crate::Result<Self> where Self: Sized {
+        if let ValueType::Identifier {} = value_type.clone() {
+            if let Value::String(data) = value.clone() {
+                if Uuid::from_str(&data).is_ok() {
+                    Ok(Identifier::from(data))
+                } else {
+                    Err(crate::Error::InvalidCastDatatype { value_type, value })
+                }
+            } else {
+                Err(crate::Error::InvalidCastDatatype { value_type, value })
+            }
+        } else {
+            Err(crate::Error::InvalidCast {
+                value_type,
+                expected_type: String::from("identifier"),
+            })
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
+#[serde(rename_all = "snake_case")]
+pub enum NodeCategory {
+    Field,
+    Container,
+    Other,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Type, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Identifier(String);
+
+impl From<String> for Identifier {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl Into<String> for Identifier {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
+impl Deref for Identifier {
+    type Target = String;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl Identifier {
+    pub fn new() -> Self {
+        Self(Uuid::new_v4().to_string())
+    }
+}
+
+impl Default for Identifier {
+    fn default() -> Self {
+        Self::new()
     }
 }

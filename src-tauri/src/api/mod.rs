@@ -1,9 +1,10 @@
 use tauri::{AppHandle, Runtime};
 use taurpc::Router;
 
-use crate::api::application::{ApplicationApi, ApplicationEventTrigger};
+use crate::api::{application::{ApplicationApi, ApplicationEventTrigger}, templates::TemplateApi};
 
 pub mod application;
+pub mod templates;
 
 pub fn router<R: Runtime>() -> Router<R> {
     Router::new()
@@ -11,8 +12,10 @@ pub fn router<R: Runtime>() -> Router<R> {
             specta_typescript::Typescript
                 ::default()
                 .bigint(specta_typescript::BigIntExportBehavior::Number)
+                .formatter(specta_typescript::formatter::prettier)
         )
         .merge(application::ApplicationApiImpl.into_handler())
+        .merge(templates::TemplateApiImpl.into_handler())
 }
 
 #[derive(Clone, Debug)]
