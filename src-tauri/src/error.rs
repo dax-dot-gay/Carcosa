@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use serde::{ Deserialize, Serialize };
+use serde_json::Value;
 use specta::Type;
+
+use crate::templates::ValueType;
 
 #[derive(Debug, Serialize, thiserror::Error, Clone)]
 #[serde(into = "SerializableError")]
@@ -17,7 +20,15 @@ pub enum Error {
     #[error("No project is currently active!")] NoActiveProject,
     #[error("Invalid project selected at path {0}")] InvalidProjectSelection(String),
     #[error("Corrupted project at path {0}: {1}")] CorruptedProject(String, String),
-    #[error("Internal tauri error: {0:?}")] TauriError(Arc<tauri::Error>)
+    #[error("Internal tauri error: {0:?}")] TauriError(Arc<tauri::Error>),
+    #[error("Invalid casting attempt: attempted to cast {value_type:?} as type {expected_type}")] InvalidCast {
+        value_type: ValueType,
+        expected_type: String
+    },
+    #[error("Failed to cast provided datatype: expected {value_type:?} but got {value:?}")] InvalidCastDatatype {
+        value_type: ValueType,
+        value: Value
+    }
 }
 
 impl From<anyhow::Error> for Error {
@@ -62,7 +73,15 @@ pub enum SerializableError {
     NoActiveProject,
     InvalidProjectSelection(String),
     CorruptedProject(String),
-    TauriError(String)
+    TauriError(String),
+    InvalidCast {
+        value_type: ValueType,
+        expected_type: String
+    },
+    InvalidCastDatatype {
+        value_type: ValueType,
+        value: Value
+    }
 }
 
 impl<T: Into<Error>> From<T> for SerializableError {
@@ -81,6 +100,8 @@ impl<T: Into<Error>> From<T> for SerializableError {
                             format!("The project at path {path} is corrupted: {reason}")
                         ),
             Error::TauriError(error) => Self::TauriError(error.to_string()),
+            Error::InvalidCast { value_type, expected_type } => Self::InvalidCast { value_type, expected_type },
+            Error::InvalidCastDatatype { value_type, value } => Self::InvalidCastDatatype { value_type, value }
         }
     }
 }

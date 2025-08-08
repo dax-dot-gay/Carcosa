@@ -8,9 +8,11 @@ import {
     Group,
     Menu,
     Stack,
+    TextInput,
 } from "@mantine/core";
 import "./style.scss";
 import {
+    TbCategoryFilled,
     TbFolder,
     TbFolderOpen,
     TbLogout2,
@@ -19,6 +21,7 @@ import {
     TbNotebook,
     TbPackage,
     TbPlus,
+    TbSearch,
     TbSettingsFilled,
     TbTemplate,
     TbTools,
@@ -37,7 +40,7 @@ import { usePersistedState } from "@/context/init";
 
 export function LayoutView() {
     const { t } = useTranslation();
-    const { createProject } = useModals();
+    const { createProject, resourceManager } = useModals();
     const nav = useNavigate();
     const { error } = useNotifications();
     const [sidebarWidth, setSidebarWidth] = usePersistedState("sidebar_width");
@@ -50,7 +53,12 @@ export function LayoutView() {
             }}
         >
             <AppShell.Header id="app-header" pr={6}>
-                <Group gap="sm" justify="space-between" id="header-root">
+                <Group
+                    gap="sm"
+                    justify="space-between"
+                    id="header-root"
+                    wrap="nowrap"
+                >
                     <Group gap={0} p={0} id="header-content">
                         <ActionIcon
                             radius={0}
@@ -153,19 +161,35 @@ export function LayoutView() {
                                 >
                                     {t("menu.project.settings")}
                                 </Menu.Item>
+                                <Menu.Item
+                                    leftSection={<TbCategoryFilled size={16} />}
+                                    onClick={() =>
+                                        resourceManager({ mode: "manager" })
+                                    }
+                                >
+                                    {t("menu.project.resourceManager")}
+                                </Menu.Item>
                                 <Menu.Divider />
                                 <Menu.Label>
-                                    {t("menu.project.resources")}
+                                    {t("menu.project.quickAdd")}
                                 </Menu.Label>
                                 <Menu.Item
                                     leftSection={<TbTemplate size={16} />}
+                                    onClick={() =>
+                                        resourceManager({
+                                            mode: "createTemplate",
+                                        })
+                                    }
                                 >
-                                    {t("menu.project.templates")}
+                                    {t("menu.project.createTemplate")}
                                 </Menu.Item>
                                 <Menu.Item
                                     leftSection={<TbPackage size={16} />}
+                                    onClick={() =>
+                                        resourceManager({ mode: "addPackage" })
+                                    }
                                 >
-                                    {t("menu.project.packs")}
+                                    {t("menu.project.addPackage")}
                                 </Menu.Item>
                             </Menu.Dropdown>
                         </Menu>
@@ -180,6 +204,11 @@ export function LayoutView() {
                             {t("menu.tools.button")}
                         </Button>
                     </Group>
+                    <TextInput
+                        leftSection={<TbSearch size={20} />}
+                        style={{ flexGrow: 1 }}
+                        placeholder={t("menu.search.placeholder")}
+                    />
                     <Group gap="sm" id="header-controls">
                         <ActionIconGroup>
                             <ActionIcon

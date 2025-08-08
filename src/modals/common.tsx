@@ -1,4 +1,4 @@
-import { Group, MantineSize, Text } from "@mantine/core";
+import { Group, MantineSize, ModalProps, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -27,16 +27,15 @@ export function createModalOpener<Props extends Record<string, any> = {}>({
     title,
     icon,
     renderer,
-    size,
-    centered,
+    ...options
 }: {
     id: string;
     title: string;
     icon: IconType;
     renderer: (props: Props) => ReactNode;
-    size?: MantineSize;
-    centered?: boolean;
-}): (props: Props) => void {
+} & Partial<
+    Omit<ModalProps, "opened" | "id" | "className" | "title" | "children">
+>): (props: Props) => void {
     let Inner = renderer;
 
     return (props: Props) => {
@@ -44,9 +43,8 @@ export function createModalOpener<Props extends Record<string, any> = {}>({
             id,
             title: <ModalHeader icon={icon} title={title} />,
             children: <Inner {...props} />,
-            size,
-            centered,
             className: `modal modal-${id}`,
+            ...options,
         });
     };
 }

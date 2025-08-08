@@ -24,7 +24,7 @@ serde = { version = "1.0.219", features = ["derive"] }
 tauri = { version = "2", features = [] }
 tokio = { version = "1.47.1", features = ["full"] }
 taurpc = "0.5.1"
-specta = { version = "=2.0.0-rc.22", features = ["derive", "uuid", "tokio", "chrono"] }
+specta = { version = "=2.0.0-rc.22", features = ["derive", "uuid", "tokio", "chrono", "serde", "serde_json"] }
 native_db = "0.8.2"
 tauri-plugin-store = "2"
 tauri-plugin-fs = "2"
@@ -42,4 +42,5 @@ async-trait = "0.1.88"
 serde_json = "1.0.142"
 specta-typescript = "0.0.9"
 paste = "1.0.15"
+spire_enum = "0.6.0"
 
