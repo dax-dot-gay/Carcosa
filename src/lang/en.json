@@ -56,12 +56,32 @@
       "success": "Created project successfully!"
     },
     "resources": {
-      "title": "Resource Manager"
+      "title": "Resource Manager",
+      "nav": {
+        "docTemplates": {
+          "title": "Local Templates"
+        },
+        "coreTemplates": {
+          "title": "Built-In Templates"
+        },
+        "packages": {
+          "title": "Template Packages"
+        }
+      },
+      "views": {
+        "index": {
+          "resource": "Resource",
+          "manager": "Manager",
+          "createTemplate": "Create Template",
+          "addPackage": "Import Package"
+        }
+      }
     }
   },
   "actions": {
     "cancel": "Cancel",
-    "create": "Create"
+    "create": "Create",
+    "import": "Import"
   },
   "errors": {
     "form": {

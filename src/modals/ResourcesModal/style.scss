@@ -11,6 +11,12 @@
         border-radius: var(--mantine-radius-xs);
         background-color: var(--mantine-color-secondary-8);
         height: 100%;
+        #rm-nav-scroll {
+            display: inline-block;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
     }
 
     #rm-content {
@@ -18,5 +24,17 @@
         position: relative;
         border: 1px solid var(--mantine-color-default-hover);
         border-radius: var(--mantine-radius-xs);
+    }
+
+    .menu-expander {
+
+        .menu-expander-button {
+            .expander-chevron {
+                transition: transform 0.2s;
+            }
+            .mantine-Button-label {
+                flex-grow: 1;
+            }
+        }
     }
 }
