@@ -74,6 +74,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
+      extreme-router:
+        specifier: ^1.1.1
+        version: 1.1.1
       i18next:
         specifier: ^25.3.2
         version: 25.3.2(typescript@5.6.3)
@@ -1179,6 +1182,10 @@ packages:
 
   estree-walker@2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
+
+  extreme-router@1.1.1:
+    resolution: {integrity: sha512-bZgppwpzMQLJS8dgfFpvDPa4Gr/CdJTVMpIbqsIxbS15JlBeeeJVYwlz1GbSffDHEOha2cJuzGnUcgq5cy41fA==}
+    engines: {bun: '>=1.0.0', node: '>=18.0.0'}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -2714,6 +2721,8 @@ snapshots:
   escape-string-regexp@4.0.0: {}
 
   estree-walker@2.0.2: {}
+
+  extreme-router@1.1.1: {}
 
   fast-deep-equal@3.1.3: {}
 
