@@ -1,42 +1,19 @@
-import { useTranslation } from "react-i18next";
 import { ResourceModalOpen } from "./types";
-import { usePersistedState } from "@/context/init";
-import { Split } from "@gfazioli/mantine-split-pane";
-import { Stack, Box } from "@mantine/core";
 import "./style.scss";
 import { IndexView } from "./views/index/IndexView";
+import { LocalRouter, Route } from "@/context/routing";
+import { ModalLayout } from "./views/layout/ModalLayout";
 
 export function ResourcesModal({ mode }: { mode: ResourceModalOpen }) {
-    const { t } = useTranslation();
-    const [sidebarWidth, setSidebarWidth] = usePersistedState(
-        "resource_manager_sidebar_width",
-    );
     return (
-        <Split
-            className="resource-manager"
-            variant="transparent"
-            hoverColor="dark.7"
-            spacing="sm"
-            size="sm"
-            withKnob
-            knobAlwaysOn
-            knobColor="dark.7"
-            knobHoverColor="dark.6"
+        <LocalRouter
+            routerId="resources"
+            initialPath="/"
+            fallback={() => <>ERROR!</>}
         >
-            <Split.Pane
-                minWidth={150}
-                maxWidth={400}
-                initialWidth={sidebarWidth}
-                onResizeEnd={({ width }) =>
-                    setSidebarWidth(Number.parseInt(width.toFixed(0)))
-                }
-            >
-                <Stack gap={0} p={0} id="rm-nav"></Stack>
-            </Split.Pane>
-            <Split.Resizer className="rm-split-handle" />
-            <Split.Pane grow>
-                <Box id="rm-content" p="sm"></Box>
-            </Split.Pane>
-        </Split>
+            <Route path="/" element={ModalLayout}>
+                <Route path="/" element={IndexView} />
+            </Route>
+        </LocalRouter>
     );
 }
