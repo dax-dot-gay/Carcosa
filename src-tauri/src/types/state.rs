@@ -8,6 +8,7 @@ pub struct State {
     pub current_project: Option<String>,
     pub color_scheme: ColorScheme,
     pub sidebar_width: u64,
+    pub resource_manager_sidebar_width: u64
 }
 
 impl FromIterator<StateValue> for State {
@@ -24,6 +25,9 @@ impl FromIterator<StateValue> for State {
                 StateValue::SidebarWidth(value) => {
                     state.sidebar_width = value;
                 }
+                StateValue::ResourceManagerSidebarWidth(value) => {
+                    state.resource_manager_sidebar_width = value;
+                }
             }
         }
 
@@ -37,6 +41,7 @@ pub enum StateKey {
     CurrentProject,
     ColorScheme,
     SidebarWidth,
+    ResourceManagerSidebarWidth
 }
 
 impl StateKey {
@@ -60,6 +65,7 @@ pub enum StateValue {
     CurrentProject(Option<String>),
     ColorScheme(ColorScheme),
     SidebarWidth(u64),
+    ResourceManagerSidebarWidth(u64)
 }
 
 impl StateValue {
@@ -68,6 +74,7 @@ impl StateValue {
             StateValue::CurrentProject(_) => StateKey::CurrentProject,
             StateValue::ColorScheme(_) => StateKey::ColorScheme,
             StateValue::SidebarWidth(_) => StateKey::SidebarWidth,
+            StateValue::ResourceManagerSidebarWidth(_) => StateKey::ResourceManagerSidebarWidth
         }
     }
 
@@ -81,6 +88,7 @@ impl StateValue {
                 StateValue::CurrentProject(val) => to_value(val.clone()),
                 StateValue::ColorScheme(color_scheme) => to_value(color_scheme.clone()),
                 StateValue::SidebarWidth(width) => to_value(width.clone()),
+                StateValue::ResourceManagerSidebarWidth(width) => to_value(width.clone())
             })?
         )
     }
@@ -94,6 +102,7 @@ impl StateValue {
             StateKey::CurrentProject => Self::CurrentProject(from_value(value)?),
             StateKey::ColorScheme => Self::ColorScheme(from_value(value)?),
             StateKey::SidebarWidth => Self::SidebarWidth(from_value(value)?),
+            StateKey::ResourceManagerSidebarWidth => Self::ResourceManagerSidebarWidth(from_value(value)?)
         })
     }
 }

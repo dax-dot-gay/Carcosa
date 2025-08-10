@@ -3,8 +3,6 @@ pub mod fields;
 pub mod containers;
 pub mod other_nodes;
 
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use specta::Type;
@@ -47,24 +45,23 @@ pub enum Node {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
-#[serde(rename_all = "snake_case", tag = "layout")]
-pub enum TemplateLayout {
-    Document {
-        header_nodes: Vec<Identifier>,
-        root_node: Identifier
-    },
-    Form {
-        ordered_children: Vec<Identifier>
-    }
+#[serde(rename_all = "snake_case")]
+pub enum PredefinedLayout {
+    RichDocument,
+    InteractableMap,
+    Calendar,
+    Timeline
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
-pub struct Template {
-    pub id: Identifier,
-    pub friendly_id: String,
-    pub name: String,
-    pub icon: Option<String>,
-    pub description: Option<String>,
-    pub nodes: HashMap<String, Node>,
-    pub layout: TemplateLayout
+#[serde(rename_all = "snake_case", tag = "layout")]
+pub enum TemplateLayout {
+    Predefined {
+        header_root_children: Vec<Identifier>,
+        layout_type: PredefinedLayout,
+    },
+    Form {
+        inherit: Option<Identifier>,
+        root_children: Vec<Identifier>
+    }
 }

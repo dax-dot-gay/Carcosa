@@ -1,4 +1,4 @@
-use crate::templates::Template;
+use crate::models::Template;
 
 #[taurpc::procedures(path = "templates")]
 pub trait TemplateApi {

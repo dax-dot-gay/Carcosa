@@ -76,5 +76,5 @@ macro_rules! models {
 models! {
     versions = v1;
     selected_version = v1;
-    models = ProjectConfiguration;
+    models = ProjectConfiguration, Template;
 }

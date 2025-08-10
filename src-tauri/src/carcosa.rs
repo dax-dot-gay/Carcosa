@@ -31,6 +31,7 @@ impl<R: Runtime> Carcosa<R> {
             .default("current_project", None::<String>)
             .default("color_scheme", "dark".to_string())
             .default("sidebar_width", 300u64)
+            .default("resource_manager_sidebar_width", 250u64)
             .build()
             .expect("Failed to retrieve application state store.")
     }

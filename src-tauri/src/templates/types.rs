@@ -1,4 +1,5 @@
 use std::{ collections::HashMap, ops::Deref, str::FromStr };
+use native_db::{Key, ToKey};
 use serde::{ Deserialize, Serialize };
 use serde_json::{ Number, Value };
 use specta::Type;
@@ -279,5 +280,15 @@ impl Identifier {
 impl Default for Identifier {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl ToKey for Identifier {
+    fn to_key(&self) -> native_db::Key {
+        Key::new(self.0.as_bytes().to_vec())
+    }
+
+    fn key_names() -> Vec<String> {
+        vec!["Identifier".to_string()]
     }
 }

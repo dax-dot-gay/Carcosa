@@ -136,6 +136,12 @@ export type OtherNode =
     | ({ node_kind: "text" } & Text)
     | ({ node_kind: "alert" } & Alert);
 
+export type PredefinedLayout =
+    | "rich_document"
+    | "interactable_map"
+    | "calendar"
+    | "timeline";
+
 export type ProjectConfiguration = {
     name: string;
     description?: string | null;
@@ -189,14 +195,20 @@ export type State = {
     current_project: string | null;
     color_scheme: ColorScheme;
     sidebar_width: number;
+    resource_manager_sidebar_width: number;
 };
 
-export type StateKey = "current_project" | "color_scheme" | "sidebar_width";
+export type StateKey =
+    | "current_project"
+    | "color_scheme"
+    | "sidebar_width"
+    | "resource_manager_sidebar_width";
 
 export type StateValue =
     | { key: "current_project"; value: string | null }
     | { key: "color_scheme"; value: ColorScheme }
-    | { key: "sidebar_width"; value: number };
+    | { key: "sidebar_width"; value: number }
+    | { key: "resource_manager_sidebar_width"; value: number };
 
 export type Switch = {
     id?: Identifier;
@@ -211,18 +223,26 @@ export type Switch = {
 };
 
 export type Template = {
-    id: Identifier;
+    id?: Identifier;
     friendly_id: string;
     name: string;
-    icon: string | null;
-    description: string | null;
-    nodes: Partial<{ [key in string]: Node }>;
+    icon?: string | null;
+    description?: string | null;
+    nodes?: Partial<{ [key in string]: Node }>;
     layout: TemplateLayout;
 };
 
 export type TemplateLayout =
-    | { layout: "document"; header_nodes: Identifier[]; root_node: Identifier }
-    | { layout: "form"; ordered_children: Identifier[] };
+    | {
+          layout: "predefined";
+          header_root_children: Identifier[];
+          layout_type: PredefinedLayout;
+      }
+    | {
+          layout: "form";
+          inherit: Identifier | null;
+          root_children: Identifier[];
+      };
 
 export type Text = {
     id?: Identifier;

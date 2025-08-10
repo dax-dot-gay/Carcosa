@@ -1,0 +1,22 @@
+.resource-manager {
+    width: 100%;
+    height: calc(100vh - 256px);
+
+    /*.rm-split-handle {
+        transform: translate(-4.5px, 0);
+        margin-right: -4.5px;
+    }*/
+
+    #rm-nav {
+        border-radius: var(--mantine-radius-xs);
+        background-color: var(--mantine-color-secondary-8);
+        height: 100%;
+    }
+
+    #rm-content {
+        height: 100%;
+        position: relative;
+        border: 1px solid var(--mantine-color-default-hover);
+        border-radius: var(--mantine-radius-xs);
+    }
+}
