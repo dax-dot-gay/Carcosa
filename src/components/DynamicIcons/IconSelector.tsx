@@ -150,7 +150,7 @@ export function IconSelector({
         });
     }, [setIcons, setSearcher, searcherActive]);
 
-    const [debouncedSearch] = useDebouncedValue(search, 0.2, { leading: true });
+    const [debouncedSearch] = useDebouncedValue(search, 300, { leading: true });
 
     const filteredIcons = useMemo(() => {
         if (debouncedSearch.length === 0) {
@@ -233,11 +233,6 @@ export function IconSelector({
                             <VirtuosoGrid
                                 className="icon-item-grid"
                                 style={{ height: "100%" }}
-                                onScroll={(e) =>
-                                    console.log(
-                                        (e.target as HTMLElement).scrollTop,
-                                    )
-                                }
                                 totalCount={filteredIcons.length}
                                 itemContent={(_, icon) => (
                                     <IconItem name={icon} />

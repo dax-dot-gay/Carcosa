@@ -1,4 +1,5 @@
 import api from "@/api";
+import { IconsProvider } from "@/components/DynamicIcons";
 import { useEvent } from "@/events";
 import { shadcnCssVariableResolver } from "@/theme/cssVariableResolver";
 import { shadcnTheme } from "@/theme/theme";
@@ -21,15 +22,17 @@ export function Wrapper() {
     useEvent(api.application.closed_project, () => nav("/"), [nav]);
 
     return (
-        <MantineProvider
-            theme={shadcnTheme}
-            cssVariablesResolver={shadcnCssVariableResolver}
-            forceColorScheme="dark"
-        >
-            <ModalsProvider>
-                <Notifications />
-                <Outlet />
-            </ModalsProvider>
-        </MantineProvider>
+        <IconsProvider>
+            <MantineProvider
+                theme={shadcnTheme}
+                cssVariablesResolver={shadcnCssVariableResolver}
+                forceColorScheme="dark"
+            >
+                <ModalsProvider>
+                    <Notifications />
+                    <Outlet />
+                </ModalsProvider>
+            </MantineProvider>
+        </IconsProvider>
     );
 }

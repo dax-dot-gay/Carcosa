@@ -1,8 +1,8 @@
-import api from "@/api";
 import { Skeleton } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { GenIcon, IconBaseProps, IconTree, IconType } from "react-icons";
 import { TbQuestionMark } from "react-icons/tb";
+import { IconsContext } from "./util";
 
 function ResolvedIcon({
     data,
@@ -16,28 +16,17 @@ export function DynamicIcon({
     fallback,
     ...props
 }: { icon: string; fallback?: IconType } & Partial<IconBaseProps>) {
+    const { icons, request, unrequest } = useContext(IconsContext);
     const size = props.size ?? 24;
-    const [iconData, setIconData] = useState<IconTree | null | "loading">(
-        "loading",
-    );
     useEffect(() => {
-        api.application.icons
-            .icon(icon)
-            .then((value) => {
-                if (value) {
-                    try {
-                        const parsedIcon = JSON.parse(value) as IconTree;
-                        setIconData(parsedIcon);
-                    } catch (e) {
-                        setIconData(null);
-                    }
-                } else {
-                    setIconData(null);
-                }
-            })
-            .catch(() => setIconData(null));
-    }, [setIconData, icon, fallback]);
+        request(icon);
+        return () => unrequest(icon);
+    }, [icon]);
     const FallbackIcon = fallback ?? TbQuestionMark;
+    const iconData = useMemo(() => {
+        const result = icons[icon];
+        return result === undefined ? "loading" : result;
+    }, [icon, icons]);
 
     return iconData === "loading" ? (
         <Skeleton height={size} width={size} animate={false} radius="xs" />
