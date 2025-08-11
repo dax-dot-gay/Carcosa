@@ -162,6 +162,7 @@ export type RichText = {
 export type SerializableError =
     | { err: "unhandled"; context: string }
     | { err: "io"; context: string }
+    | { err: "zip"; context: string }
     | { err: "non_empty_project_folder"; context: string }
     | { err: "expected_project_directory"; context: string }
     | { err: "json_encoding"; context: string }
@@ -280,6 +281,8 @@ export type Wrapper = {
 const ARGS_MAP = {
     application:
         '{"closed_project":[],"create_project":["project"],"exit_project":[],"full_state":[],"get_state":["key"],"open_project":["path"],"opened_project":["path","config"],"project_config":[],"project_directory":[],"set_state":["value"],"updated_state":["new_state"]}',
+    "application.icons":
+        '{"icon":["icon"],"icon_categories":[],"icons":["icons"],"icons_in_category":["category"]}',
     templates: '{"get_template":["id"]}',
 };
 export type Router = {
@@ -300,6 +303,14 @@ export type Router = {
         project_directory: () => Promise<string | null>;
         set_state: (value: StateValue) => Promise<null>;
         updated_state: (newState: State) => Promise<void>;
+    };
+    "application.icons": {
+        icon: (icon: string) => Promise<string | null>;
+        icon_categories: () => Promise<string[]>;
+        icons: (
+            icons: string[],
+        ) => Promise<Partial<{ [key in string]: string | null }>>;
+        icons_in_category: (category: string) => Promise<string[] | null>;
     };
     templates: { get_template: (id: string) => Promise<Template | null> };
 };

@@ -1,7 +1,7 @@
 use tauri::{AppHandle, Runtime};
 use taurpc::Router;
 
-use crate::api::{application::{ApplicationApi, ApplicationEventTrigger}, templates::TemplateApi};
+use crate::api::{application::{ApplicationApi, ApplicationEventTrigger, ApplicationIconsApi}, templates::TemplateApi};
 
 pub mod application;
 pub mod templates;
@@ -16,6 +16,7 @@ pub fn router<R: Runtime>() -> Router<R> {
         )
         .merge(application::ApplicationApiImpl.into_handler())
         .merge(templates::TemplateApiImpl.into_handler())
+        .merge(application::ApplicationIconsApiImpl.into_handler())
 }
 
 #[derive(Clone, Debug)]

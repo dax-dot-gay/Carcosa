@@ -11,6 +11,7 @@ use crate::templates::ValueType;
 pub enum Error {
     #[error("Unhandled exception: {0:?}")] Unhandled(Arc<anyhow::Error>),
     #[error("Filesystem IO error: {0:?}")] Io(Arc<std::io::Error>),
+    #[error("Zip extraction error: {0:?}")] Zip(Arc<zip::result::ZipError>),
     #[error("Selected project folder ({0}) already contains files.")] NonEmptyProjectFolder(String),
     #[error("Selected project path exists & is not a directory: {0}")] ExpectedProjectDirectory(
         String,
@@ -61,11 +62,18 @@ impl From<tauri::Error> for Error {
     }
 }
 
+impl From<zip::result::ZipError> for Error {
+    fn from(value: zip::result::ZipError) -> Self {
+        Self::Zip(Arc::new(value))
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, Type)]
 #[serde(tag = "err", content = "context", rename_all = "snake_case")]
 pub enum SerializableError {
     Unhandled(String),
     Io(String),
+    Zip(String),
     NonEmptyProjectFolder(String),
     ExpectedProjectDirectory(String),
     JsonEncoding(String),
@@ -89,6 +97,7 @@ impl<T: Into<Error>> From<T> for SerializableError {
         match value.into() {
             Error::Unhandled(error) => Self::Unhandled(error.to_string()),
             Error::Io(error) => Self::Io(error.to_string()),
+            Error::Zip(error) => Self::Zip(error.to_string()),
             Error::NonEmptyProjectFolder(folder) => Self::NonEmptyProjectFolder(folder),
             Error::ExpectedProjectDirectory(path) => Self::ExpectedProjectDirectory(path),
             Error::JsonEncoding(error) => Self::JsonEncoding(error.to_string()),

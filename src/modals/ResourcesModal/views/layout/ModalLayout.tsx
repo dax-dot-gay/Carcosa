@@ -81,7 +81,6 @@ export function ModalLayout() {
         useDisclosure(false);
     const [packages, { toggle: togglePackages }] = useDisclosure(false);
     const nav = useNavigate();
-
     return (
         <Split
             className="resource-manager"

@@ -1,11 +1,12 @@
-use std::path::PathBuf;
-use tauri::Runtime;
+use std::{collections::HashMap, io::Read, path::PathBuf};
+use convert_case::{Case, Casing};
+use tauri::{Manager, Runtime};
 use tokio::fs;
 
 use crate::{
     carcosa::CarcosaExt,
     models::ProjectConfiguration,
-    types::state::{ State, StateKey, StateValue },
+    types::state::{ State, StateKey, StateValue }, SerializableError,
 };
 
 #[taurpc::ipc_type]
@@ -189,5 +190,63 @@ impl ApplicationApi for ApplicationApiImpl {
 
     async fn full_state<R: Runtime>(self, app_handle: tauri::AppHandle<R>) -> State {
         app_handle.carcosa().full_state()
+    }
+}
+
+#[taurpc::procedures(path = "application.icons")]
+pub trait ApplicationIconsApi {
+    async fn icon_categories<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<Vec<String>, SerializableError>;
+    async fn icons_in_category<R: Runtime>(app_handle: tauri::AppHandle<R>, category: String) -> Result<Option<Vec<String>>, SerializableError>;
+    async fn icon<R: Runtime>(app_handle: tauri::AppHandle<R>, icon: String) -> Result<Option<String>, SerializableError>;
+    async fn icons<R: Runtime>(app_handle: tauri::AppHandle<R>, icons: Vec<String>) -> Result<HashMap<String, Option<String>>, SerializableError>;
+}
+
+#[derive(Clone)]
+pub struct ApplicationIconsApiImpl;
+
+#[taurpc::resolvers]
+impl ApplicationIconsApi for ApplicationIconsApiImpl {
+    async fn icon_categories<R: Runtime>(self, app_handle: tauri::AppHandle<R>) -> Result<Vec<String>, SerializableError> {
+        let icon_info_path = app_handle.path().resolve("resources/icons.json", tauri::path::BaseDirectory::Resource)?;
+        let json_data: HashMap<String, Vec<String>> = serde_json::from_str(&fs::read_to_string(icon_info_path).await?)?;
+
+        Ok(json_data.into_keys().collect())
+    }
+    async fn icons_in_category<R: Runtime>(self, app_handle: tauri::AppHandle<R>, category: String) -> Result<Option<Vec<String>>, SerializableError> {
+        let icon_info_path = app_handle.path().resolve("resources/icons.json", tauri::path::BaseDirectory::Resource)?;
+        let json_data: HashMap<String, Vec<String>> = serde_json::from_str(&fs::read_to_string(icon_info_path).await?)?;
+
+        Ok(json_data.get(&category.to_case(Case::Snake)).and_then(|v| Some(v.clone())))
+    }
+    async fn icon<R: Runtime>(self, app_handle: tauri::AppHandle<R>, icon: String) -> Result<Option<String>, SerializableError> {
+        let icon_data_path = app_handle.path().resolve("resources/icons.zip", tauri::path::BaseDirectory::Resource)?;
+        let file = fs::File::open(icon_data_path).await?.into_std().await;
+        let mut archive = zip::ZipArchive::new(file)?;
+        let extract_result = archive.by_name(&format!("{}.json", icon.to_case(Case::Snake)));
+        if let Ok(mut found) = extract_result {
+            let mut output = String::new();
+            found.read_to_string(&mut output)?;
+            Ok(Some(output))
+        } else {
+            Ok(None)
+        }
+    }
+    async fn icons<R: Runtime>(self, app_handle: tauri::AppHandle<R>, icons: Vec<String>) -> Result<HashMap<String, Option<String>>, SerializableError> {
+        let icon_data_path = app_handle.path().resolve("resources/icons.zip", tauri::path::BaseDirectory::Resource)?;
+        let file = fs::File::open(icon_data_path).await?.into_std().await;
+        let mut archive = zip::ZipArchive::new(file)?;
+        let mut mapping = HashMap::new();
+        for icon in icons {
+            let extract_result = archive.by_name(&format!("{}.json", icon.clone().to_case(Case::Snake)));
+            if let Ok(mut found) = extract_result {
+                let mut output = String::new();
+                found.read_to_string(&mut output)?;
+                let _ = mapping.insert(icon, Some(output));
+            } else {
+                let _ = mapping.insert(icon, None);
+            }
+        }
+
+        Ok(mapping)
     }
 }
