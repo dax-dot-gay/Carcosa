@@ -83,7 +83,7 @@ fn main() {
 
             archive.finish().unwrap();
 
-            fs::write(manifest_path.join("resources/icons.json"), serde_json::to_string_pretty(&icon_map).unwrap()).unwrap();
+            fs::write(manifest_path.join("resources/icons.json"), serde_json::to_string(&icon_map).unwrap()).unwrap();
 
             log!("Resolved {} icons in total.", found_icons);
         } else {

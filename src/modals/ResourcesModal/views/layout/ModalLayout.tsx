@@ -165,7 +165,7 @@ export function ModalLayout() {
             </Split.Pane>
             <Split.Resizer className="rm-split-handle" />
             <Split.Pane grow>
-                <Box id="rm-content" p="sm">
+                <Box id="rm-content" p={0}>
                     <Outlet />
                 </Box>
             </Split.Pane>

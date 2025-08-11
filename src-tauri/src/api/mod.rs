@@ -1,3 +1,4 @@
+use moka::future::Cache;
 use tauri::{AppHandle, Runtime};
 use taurpc::Router;
 
@@ -16,7 +17,7 @@ pub fn router<R: Runtime>() -> Router<R> {
         )
         .merge(application::ApplicationApiImpl.into_handler())
         .merge(templates::TemplateApiImpl.into_handler())
-        .merge(application::ApplicationIconsApiImpl.into_handler())
+        .merge(application::ApplicationIconsApiImpl(Cache::new(10000)).into_handler())
 }
 
 #[derive(Clone, Debug)]

@@ -282,7 +282,7 @@ const ARGS_MAP = {
     application:
         '{"closed_project":[],"create_project":["project"],"exit_project":[],"full_state":[],"get_state":["key"],"open_project":["path"],"opened_project":["path","config"],"project_config":[],"project_directory":[],"set_state":["value"],"updated_state":["new_state"]}',
     "application.icons":
-        '{"icon":["icon"],"icon_categories":[],"icons":["icons"],"icons_in_category":["category"]}',
+        '{"all_icons":[],"icon":["icon"],"icon_categories":[],"icons":["icons"],"icons_in_category":["category"]}',
     templates: '{"get_template":["id"]}',
 };
 export type Router = {
@@ -305,6 +305,7 @@ export type Router = {
         updated_state: (newState: State) => Promise<void>;
     };
     "application.icons": {
+        all_icons: () => Promise<string[]>;
         icon: (icon: string) => Promise<string | null>;
         icon_categories: () => Promise<string[]>;
         icons: (

@@ -74,6 +74,11 @@
           "manager": "Manager",
           "createTemplate": "Create Template",
           "addPackage": "Import Package"
+        },
+        "templates": {
+          "create": {
+            "title": "New Template"
+          }
         }
       }
     }
@@ -93,5 +98,45 @@
       "success": "Success!",
       "error": "Error:"
     }
+  },
+  "components": {
+    "iconSelector": {
+      "title": "Select Icon",
+      "search": "Search icons...",
+      "clear": "Clear Selection"
+    }
+  },
+  "icons": {
+    "ai": "Ant Design Icons",
+    "bs": "Bootstrap Icons",
+    "bi": "BoxIcons",
+    "ci": "Circum Icons",
+    "cg": "css.gg",
+    "di": "Devicons",
+    "fi": "Feather",
+    "fc": "Flat Color Icons",
+    "fa": "Font Awesome 5",
+    "fa6": "Font Awesome 6",
+    "gi": "Game Icons",
+    "go": "Github Octicons",
+    "gr": "Grommet-Icons",
+    "hi": "Heroicons",
+    "hi2": "Heroicons 2",
+    "im": "IcoMoon Free",
+    "lia": "Icons8 Line Awesome",
+    "io": "Ionicons 4",
+    "io5": "Ionicons 5",
+    "lu": "Lucide",
+    "md": "Material Design Icons",
+    "pi": "Phosphor Icons",
+    "rx": "Radix Icons",
+    "ri": "Remix Icons",
+    "si": "Simple Icons",
+    "sl": "Simple Line Icons",
+    "tb": "Tabler Icons",
+    "tfi": "Themify Icons",
+    "ti": "Typicons",
+    "vsc": "VS Code Icons",
+    "wi": "Weather Icons"
   }
 }

@@ -1,0 +1,25 @@
+.icon-item-grid {
+    .icon-item {
+        position: relative;
+        transition: background-color 0.1s;
+        cursor: pointer;
+        border: 1px solid #00000000;
+
+        &:hover {
+            background-color: var(--mantine-color-default-hover) !important;
+        }
+
+        &.selected {
+            border: 1px solid var(--mantine-primary-color-filled);
+        }
+
+        .icon-item-badge {
+            position: absolute;
+            top: 0px;
+            left: 50%;
+            transform: translate(-50%, 0);
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+    }
+}

@@ -1,13 +1,10 @@
-import Extreme, { param, wildcard } from "extreme-router";
-import {
-    JSX,
-    ReactNode,
-    useContext,
-    useEffect,
-    useMemo,
-    useReducer,
-    useState,
-} from "react";
+import Extreme, {
+    groupParam,
+    optionalParam,
+    param,
+    wildcard,
+} from "extreme-router";
+import { ReactNode, useContext, useMemo, useReducer } from "react";
 import {
     RouteContext,
     RouteContextType,
@@ -20,7 +17,7 @@ import {
 import { useRouter } from "./utils";
 import { trimEnd, trimStart, uniqueId } from "lodash";
 import { useDeepCompareEffect, useDeepCompareMemo } from "use-deep-compare";
-import { useListState, useStateHistory } from "@mantine/hooks";
+import { useStateHistory } from "@mantine/hooks";
 
 type RouterUpdateAction =
     | {
@@ -62,7 +59,7 @@ export function LocalRouter({
         [
             uniqueId(),
             new Extreme<{ context: RouteContextType }>({
-                plugins: [param, wildcard],
+                plugins: [param, wildcard, groupParam, optionalParam],
             }),
         ],
     );
@@ -164,7 +161,7 @@ export function Route({
     children,
 }: {
     path: string;
-    element: RouteHandler;
+    element?: RouteHandler;
     children?: ReactNode | ReactNode[];
 }) {
     const parent = useRouter();
@@ -180,10 +177,9 @@ export function Route({
                             "/" +
                             trimStart(path, "/")
                           : "/" + trimStart(path, "/"),
-                      handlerStack: [
-                          ...(parent_route?.handlerStack ?? []),
-                          element,
-                      ],
+                      handlerStack: element
+                          ? [...(parent_route?.handlerStack ?? []), element]
+                          : (parent_route?.handlerStack ?? []),
                   }
                 : (null as any),
         [parent, parent_route, element],

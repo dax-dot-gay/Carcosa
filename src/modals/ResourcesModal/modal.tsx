@@ -3,7 +3,7 @@ import "./style.scss";
 import { IndexView } from "./views/index/IndexView";
 import { LocalRouter, Route } from "@/context/routing";
 import { ModalLayout } from "./views/layout/ModalLayout";
-import { TemplateCreator } from "./views/template_creation/TemplateCreation";
+import { TemplateEditor } from "./views/template_editor/TemplateEditor";
 
 export function ResourcesModal({ mode }: { mode: ResourceModalOpen }) {
     return (
@@ -14,7 +14,10 @@ export function ResourcesModal({ mode }: { mode: ResourceModalOpen }) {
         >
             <Route path="/" element={ModalLayout}>
                 <Route path="/" element={IndexView} />
-                <Route path="/templates/create" element={TemplateCreator} />
+                <Route
+                    path="/templates/:mode(create|edit|view)/:id?"
+                    element={TemplateEditor}
+                />
             </Route>
         </LocalRouter>
     );

@@ -77,6 +77,9 @@ importers:
       extreme-router:
         specifier: ^1.1.1
         version: 1.1.1
+      fuse.js:
+        specifier: ^7.1.0
+        version: 7.1.0
       i18next:
         specifier: ^25.3.2
         version: 25.3.2(typescript@5.6.3)
@@ -104,6 +107,9 @@ importers:
       react-router:
         specifier: 7.8.0
         version: 7.8.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      react-virtuoso:
+        specifier: ^4.14.0
+        version: 4.14.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       taurpc:
         specifier: ^1.8.1
         version: 1.8.1
@@ -1227,6 +1233,10 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
+  fuse.js@7.1.0:
+    resolution: {integrity: sha512-trLf4SzuuUxfusZADLINj+dE8clK1frKdmqiJNb1Es75fmI5oY6X2mxLVUciLLjxqw/xr72Dhy+lER6dGd02FQ==}
+    engines: {node: '>=10'}
+
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
@@ -1588,6 +1598,12 @@ packages:
     peerDependencies:
       react: '>=16.6.0'
       react-dom: '>=16.6.0'
+
+  react-virtuoso@4.14.0:
+    resolution: {integrity: sha512-fR+eiCvirSNIRvvCD7ueJPRsacGQvUbjkwgWzBZXVq+yWypoH7mRUvWJzGHIdoRaCZCT+6mMMMwIG2S1BW3uwA==}
+    peerDependencies:
+      react: '>=16 || >=17 || >= 18 || >= 19'
+      react-dom: '>=16 || >=17 || >= 18 || >=19'
 
   react@19.1.1:
     resolution: {integrity: sha512-w8nqGImo45dmMIfljjMwOGtbmC/mk4CMYhWIicdSflH91J9TyCyczcPFXJzrZ/ZXcgGRFeP6BU0BEJTw6tZdfQ==}
@@ -2770,6 +2786,8 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
+  fuse.js@7.1.0: {}
+
   gensync@1.0.0-beta.2: {}
 
   get-nonce@1.0.1: {}
@@ -3142,6 +3160,11 @@ snapshots:
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
+
+  react-virtuoso@4.14.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
+    dependencies:
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)
 
