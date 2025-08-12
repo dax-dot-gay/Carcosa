@@ -1,3 +1,5 @@
+import api, { TemplateMetadata } from "@/api";
+import { DynamicIcon } from "@/components/DynamicIcons";
 import { usePersistedState } from "@/context/init";
 import { Outlet, useNavigate } from "@/context/routing";
 import { Split } from "@gfazioli/mantine-split-pane";
@@ -10,7 +12,7 @@ import {
     Divider,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { IconType } from "react-icons";
 import {
@@ -81,6 +83,15 @@ export function ModalLayout() {
         useDisclosure(false);
     const [packages, { toggle: togglePackages }] = useDisclosure(false);
     const nav = useNavigate();
+
+    const [projectTemplates, setProjectTemplates] = useState<
+        TemplateMetadata[]
+    >([]);
+
+    useEffect(() => {
+        api.templates.package_templates("::project").then(setProjectTemplates);
+    }, [setProjectTemplates]);
+
     return (
         <Split
             className="resource-manager"
@@ -113,6 +124,31 @@ export function ModalLayout() {
                                 onToggle={toggleDocTemplates}
                             >
                                 <Stack gap="xs" p={0}>
+                                    {projectTemplates.map((metadata) => (
+                                        <Button
+                                            key={metadata.id}
+                                            size="xs"
+                                            variant="light"
+                                            fullWidth
+                                            leftSection={
+                                                <DynamicIcon
+                                                    icon={
+                                                        metadata.icon ??
+                                                        "tb_template"
+                                                    }
+                                                    size={18}
+                                                />
+                                            }
+                                            justify="space-between"
+                                            onClick={() =>
+                                                nav(
+                                                    `/templates/edit/${metadata.id}`,
+                                                )
+                                            }
+                                        >
+                                            {metadata.name}
+                                        </Button>
+                                    ))}
                                     <Divider />
                                     <Button
                                         size="xs"

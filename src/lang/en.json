@@ -76,9 +76,27 @@
           "addPackage": "Import Package"
         },
         "templates": {
+          "name": "Template Name...",
+          "description": "Template Description...",
+          "layouts": {
+            "form": "Form",
+            "rich_document": "Text",
+            "interactable_map": "Map",
+            "calendar": "Calendar",
+            "timeline": "Timeline"
+          },
+          "layout_descs": {
+            "form": "An editable form with entirely template-defined fields",
+            "rich_document": "A rich-text document with optional metadata",
+            "interactable_map": "An interactable map or image with optional metadata",
+            "calendar": "A user-defined calendar with optional metadata",
+            "timeline": "A timeline of events with optional metadata"
+          },
+          "edit": {},
           "create": {
             "title": "New Template"
-          }
+          },
+          "layoutLabel": "Template Layout"
         }
       }
     }
@@ -91,7 +109,14 @@
   "errors": {
     "form": {
       "empty": "Please fill out this field!"
-    }
+    },
+    "formatted": {
+      "noActiveProject": "No project is open right now!",
+      "invalidCast": "Invalid cast attempt (indicates an internal server error): expected {{expected}}, got {{actual}}.",
+      "invalidCastDatatype": "Incorrect data type passed to casting operation: expected {expected}, got {actual}"
+    },
+    "unknown": "An unknown error occurred: {{error}}",
+    "notFound": "Unknown item (not found!)"
   },
   "common": {
     "notif": {
@@ -103,7 +128,8 @@
     "iconSelector": {
       "title": "Select Icon",
       "search": "Search icons...",
-      "clear": "Clear Selection"
+      "clear": "Clear Selection",
+      "tooltip": "Select Icon"
     }
   },
   "icons": {

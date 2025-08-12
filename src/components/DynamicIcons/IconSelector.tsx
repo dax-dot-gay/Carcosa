@@ -168,13 +168,36 @@ export function IconSelector({
 
     return (
         <>
-            <ActionIcon {...props} onClick={() => setOpened(true)}>
-                {_value ? (
-                    <DynamicIcon icon={_value} size={iconSize} />
-                ) : (
-                    <EmptyIcon opacity={0.4} size={iconSize} />
-                )}
-            </ActionIcon>
+            <Tooltip
+                bg="var(--mantine-color-secondary-8)"
+                px="xs"
+                label={
+                    _value ? (
+                        <Group gap="xs" p={6} px={0}>
+                            <Badge variant="light" size="sm">
+                                {t(`icons.${_value.split("_")[0]}`)}
+                            </Badge>
+                            <Text size="sm">
+                                {startCase(
+                                    _value.split("_").slice(1).join(" "),
+                                )}
+                            </Text>
+                        </Group>
+                    ) : (
+                        t("components.iconSelector.tooltip")
+                    )
+                }
+                c="var(--mantine-color-text)"
+                withArrow
+            >
+                <ActionIcon {...props} onClick={() => setOpened(true)}>
+                    {_value ? (
+                        <DynamicIcon icon={_value} size={iconSize} />
+                    ) : (
+                        <EmptyIcon opacity={0.4} size={iconSize} />
+                    )}
+                </ActionIcon>
+            </Tooltip>
             <Modal
                 opened={opened}
                 onClose={() => setOpened(false)}

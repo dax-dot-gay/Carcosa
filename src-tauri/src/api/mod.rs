@@ -2,7 +2,7 @@ use moka::future::Cache;
 use tauri::{AppHandle, Runtime};
 use taurpc::Router;
 
-use crate::api::{application::{ApplicationApi, ApplicationEventTrigger, ApplicationIconsApi}, templates::TemplateApi};
+use crate::{api::{application::{ApplicationApi, ApplicationEventTrigger, ApplicationIconsApi}, templates::TemplateApi}, SerializableError};
 
 pub mod application;
 pub mod templates;
@@ -32,3 +32,5 @@ impl<R: Runtime> Events<R> {
         ApplicationEventTrigger::new(self.0.clone())
     }
 }
+
+pub type ApiResult<T> = Result<T, SerializableError>;

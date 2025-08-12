@@ -1,9 +1,11 @@
-use std::{ collections::HashMap, ops::Deref, str::FromStr };
-use native_db::{Key, ToKey};
+use std::{ collections::HashMap, fmt::Display, ops::Deref, str::FromStr };
+use native_db::{ Key, ToKey };
 use serde::{ Deserialize, Serialize };
 use serde_json::{ Number, Value };
 use specta::Type;
 use uuid::Uuid;
+
+use crate::{ models::Template, templates::TemplateLayout };
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 #[serde(rename_all = "snake_case", tag = "kind")]
@@ -290,5 +292,130 @@ impl ToKey for Identifier {
 
     fn key_names() -> Vec<String> {
         vec!["Identifier".to_string()]
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
+pub enum InnerPackageId {
+    #[serde(rename = "::project")]
+    Project,
+
+    #[serde(rename = "::internal")]
+    Internal
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
+#[serde(untagged)]
+pub enum PackageId {
+    #[serde(rename = "::project")]
+    Project(InnerPackageId),
+
+    #[serde(rename = "::internal")]
+    Internal(InnerPackageId),
+
+    Package(String),
+}
+
+impl PackageId {
+    pub fn project() -> Self {
+        Self::Project(InnerPackageId::Project)
+    }
+
+    pub fn internal() -> Self {
+        Self::Internal(InnerPackageId::Internal)
+    }
+
+    pub fn package(id: impl AsRef<str>) -> Self {
+        Self::Package(id.as_ref().to_string())
+    }
+}
+
+impl Default for PackageId {
+    fn default() -> Self {
+        Self::Project(InnerPackageId::Project)
+    }
+}
+
+impl Display for PackageId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PackageId::Project(_) => f.write_str("::project"),
+            PackageId::Internal(_) => f.write_str("::internal"),
+            PackageId::Package(package_id) => f.write_str(&package_id),
+        }
+    }
+}
+
+impl From<String> for PackageId {
+    fn from(value: String) -> Self {
+        match value.as_str() {
+            "::project" => Self::Project(InnerPackageId::Project),
+            "::internal" => Self::Internal(InnerPackageId::Internal),
+            other => Self::Package(other.to_string()),
+        }
+    }
+}
+
+impl Into<String> for PackageId {
+    fn into(self) -> String {
+        self.to_string()
+    }
+}
+
+impl ToKey for PackageId {
+    fn to_key(&self) -> native_db::Key {
+        Key::new(self.to_string().as_bytes().to_vec())
+    }
+
+    fn key_names() -> Vec<String> {
+        vec!["PackageId".to_string()]
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
+#[serde(rename_all = "snake_case")]
+pub enum FormTyper {
+    Form
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
+#[serde(rename_all = "snake_case", untagged)]
+pub enum AllTemplateLayouts {
+    Form(FormTyper),
+    Predefined(super::PredefinedLayout),
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
+pub struct TemplateMetadata {
+    pub id: Identifier,
+    pub friendly_id: String,
+    pub package: PackageId,
+    pub icon: Option<String>,
+    pub name: String,
+    pub description: Option<String>,
+    pub layout: AllTemplateLayouts,
+    pub inherit: Option<(PackageId, Identifier)>,
+}
+
+impl From<Template> for TemplateMetadata {
+    fn from(value: Template) -> Self {
+        Self {
+            id: value.id.clone(),
+            friendly_id: value.friendly_id.clone(),
+            package: value.package.clone(),
+            icon: value.icon.clone(),
+            name: value.name.clone(),
+            description: value.description.clone(),
+            layout: match value.layout.clone() {
+                TemplateLayout::Predefined { layout_type, .. } =>
+                    AllTemplateLayouts::Predefined(layout_type),
+                TemplateLayout::Form { .. } => AllTemplateLayouts::Form(FormTyper::Form),
+            },
+            inherit: if let TemplateLayout::Form { inherit, .. } = value.layout.clone() {
+                inherit
+            } else {
+                None
+            },
+        }
     }
 }

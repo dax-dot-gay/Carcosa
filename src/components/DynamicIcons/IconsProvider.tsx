@@ -1,15 +1,16 @@
 import api from "@/api";
-import { useDebouncedValue, useSet } from "@mantine/hooks";
+import { randomId, useDebouncedValue, useMap, useSet } from "@mantine/hooks";
 import { ReactNode, useEffect, useState } from "react";
 import { IconTree } from "react-icons";
 import { IconsContext } from "./util";
+import { uniq } from "lodash";
 
 export function IconsProvider({
     children,
 }: {
     children?: ReactNode | ReactNode[];
 }) {
-    const requests = useSet<string>([]);
+    const requests = useMap<string, string>([]);
     const [icons, setIcons] = useState<{ [key: string]: IconTree | null }>({});
     const [debouncedRequests] = useDebouncedValue(requests, 750, {
         leading: true,
@@ -20,7 +21,7 @@ export function IconsProvider({
     useEffect(() => {
         if (debouncedRequests.size > 0) {
             api.application.icons
-                .icons(Array.from(debouncedRequests))
+                .icons(uniq(Array.from(debouncedRequests.values())))
                 .then((results) => {
                     setIcons(
                         Object.fromEntries(
@@ -39,10 +40,12 @@ export function IconsProvider({
             value={{
                 icons,
                 request: (icon) => {
-                    requests.add(icon);
+                    const id = randomId();
+                    requests.set(id, icon);
+                    return id;
                 },
-                unrequest: (icon) => {
-                    requests.delete(icon);
+                unrequest: (id) => {
+                    requests.delete(id);
                 },
             }}
         >

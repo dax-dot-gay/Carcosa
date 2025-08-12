@@ -8,7 +8,7 @@ use serde_json::Value;
 use specta::Type;
 pub use types::{ FromValue, ValueType, NodeCategory, Identifier };
 
-use crate::templates::{containers::ContainerNode, fields::FieldNode, other_nodes::OtherNode};
+use crate::templates::{containers::ContainerNode, fields::FieldNode, other_nodes::OtherNode, types::PackageId};
 
 pub trait TemplateNode {
     fn id(&self) -> Identifier;
@@ -61,7 +61,7 @@ pub enum TemplateLayout {
         layout_type: PredefinedLayout,
     },
     Form {
-        inherit: Option<Identifier>,
+        inherit: Option<(PackageId, Identifier)>,
         root_children: Vec<Identifier>
     }
 }

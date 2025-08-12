@@ -6,7 +6,7 @@ use serde::{ Deserialize, Serialize };
 use specta::Type;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Type)]
-#[native_model(id = 1, version = 1)]
+#[native_model(id = 1, version = 1, with = crate::models::MsgPack)]
 #[native_db]
 pub struct ProjectConfiguration {
     #[primary_key]

@@ -19,8 +19,8 @@ export function DynamicIcon({
     const { icons, request, unrequest } = useContext(IconsContext);
     const size = props.size ?? 24;
     useEffect(() => {
-        request(icon);
-        return () => unrequest(icon);
+        const id = request(icon);
+        return () => unrequest(id);
     }, [icon]);
     const FallbackIcon = fallback ?? TbQuestionMark;
     const iconData = useMemo(() => {

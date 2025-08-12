@@ -16,6 +16,8 @@ export type Alert = {
 
 export type AlertLevel = "default" | "info" | "success" | "warning" | "error";
 
+export type AllTemplateLayouts = FormTyper | PredefinedLayout;
+
 export type Collapsible = {
     id?: Identifier;
     parent?: Identifier | null;
@@ -46,6 +48,14 @@ export type CreateProjectModel = {
     description?: string | null;
 };
 
+export type CreateTemplateModel = {
+    icon: string | null;
+    name: string;
+    description: string | null;
+    layout: AllTemplateLayouts;
+    inherit?: [PackageId, Identifier] | null;
+};
+
 export type FieldNode =
     | ({ node_kind: "text_field" } & TextField)
     | ({ node_kind: "number_field" } & NumberField)
@@ -56,7 +66,11 @@ export type FieldNode =
     | ({ node_kind: "linked_document" } & LinkedDocument)
     | ({ node_kind: "multi_linked_documents" } & MultiLinkedDocuments);
 
+export type FormTyper = "form";
+
 export type Identifier = string;
+
+export type InnerPackageId = "::project" | "::internal";
 
 export type JsonValue =
     | null
@@ -135,6 +149,8 @@ export type NumberField = {
 export type OtherNode =
     | ({ node_kind: "text" } & Text)
     | ({ node_kind: "alert" } & Alert);
+
+export type PackageId = InnerPackageId | string;
 
 export type PredefinedLayout =
     | "rich_document"
@@ -227,6 +243,7 @@ export type Template = {
     id?: Identifier;
     friendly_id: string;
     name: string;
+    package: PackageId;
     icon?: string | null;
     description?: string | null;
     nodes?: Partial<{ [key in string]: Node }>;
@@ -241,9 +258,20 @@ export type TemplateLayout =
       }
     | {
           layout: "form";
-          inherit: Identifier | null;
+          inherit: [PackageId, Identifier] | null;
           root_children: Identifier[];
       };
+
+export type TemplateMetadata = {
+    id: Identifier;
+    friendly_id: string;
+    package: PackageId;
+    icon: string | null;
+    name: string;
+    description: string | null;
+    layout: AllTemplateLayouts;
+    inherit: [PackageId, Identifier] | null;
+};
 
 export type Text = {
     id?: Identifier;
@@ -283,7 +311,8 @@ const ARGS_MAP = {
         '{"closed_project":[],"create_project":["project"],"exit_project":[],"full_state":[],"get_state":["key"],"open_project":["path"],"opened_project":["path","config"],"project_config":[],"project_directory":[],"set_state":["value"],"updated_state":["new_state"]}',
     "application.icons":
         '{"all_icons":[],"icon":["icon"],"icon_categories":[],"icons":["icons"],"icons_in_category":["category"]}',
-    templates: '{"get_template":["id"]}',
+    templates:
+        '{"all_templates":[],"create_template":["model"],"get_template_by_friendly_id":["id"],"get_template_by_uuid":["id"],"package_templates":["pkg"]}',
 };
 export type Router = {
     application: {
@@ -313,7 +342,13 @@ export type Router = {
         ) => Promise<Partial<{ [key in string]: string | null }>>;
         icons_in_category: (category: string) => Promise<string[] | null>;
     };
-    templates: { get_template: (id: string) => Promise<Template | null> };
+    templates: {
+        all_templates: () => Promise<TemplateMetadata[]>;
+        create_template: (model: CreateTemplateModel) => Promise<Template>;
+        get_template_by_friendly_id: (id: string) => Promise<Template | null>;
+        get_template_by_uuid: (id: string) => Promise<Template | null>;
+        package_templates: (pkg: PackageId) => Promise<TemplateMetadata[]>;
+    };
 };
 
 export const createTauRPCProxy = () => createProxy<Router>(ARGS_MAP);

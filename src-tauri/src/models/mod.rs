@@ -78,3 +78,21 @@ models! {
     selected_version = v1;
     models = ProjectConfiguration, Template;
 }
+
+pub struct MsgPack;
+
+impl<T: serde::Serialize> native_model::Encode<T> for MsgPack {
+    type Error = rmp_serde::encode::Error;
+    /// Serializes a type into bytes using the `rmp-serde` `1.3` crate.
+    fn encode(obj: &T) -> Result<Vec<u8>, Self::Error> {
+        rmp_serde::encode::to_vec_named(obj)
+    }
+}
+
+impl<T: for<'de> serde::Deserialize<'de>> native_model::Decode<T> for MsgPack {
+    type Error = rmp_serde::decode::Error;
+    /// Deserializes a type from bytes using the `rmp-serde` `1.3` crate.
+    fn decode(data: Vec<u8>) -> Result<T, Self::Error> {
+        rmp_serde::decode::from_slice(&data)
+    }
+}

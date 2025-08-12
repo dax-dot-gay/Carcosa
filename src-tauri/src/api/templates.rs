@@ -1,8 +1,53 @@
-use crate::models::Template;
+use std::collections::HashMap;
+
+use convert_case::{ Case, Casing };
+use serde::{ Deserialize, Serialize };
+use specta::Type;
+use tauri::{ AppHandle, Runtime };
+
+use crate::{
+    api::ApiResult,
+    carcosa::CarcosaExt,
+    models::{ keys::TemplateKey, Template },
+    templates::{
+        types::{ AllTemplateLayouts, FormTyper, PackageId, TemplateMetadata },
+        Identifier,
+        TemplateLayout,
+    },
+};
+
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
+pub struct CreateTemplateModel {
+    pub icon: Option<String>,
+    pub name: String,
+    pub description: Option<String>,
+    pub layout: AllTemplateLayouts,
+
+    #[serde(default)]
+    pub inherit: Option<(PackageId, Identifier)>,
+}
 
 #[taurpc::procedures(path = "templates")]
 pub trait TemplateApi {
-    async fn get_template(id: String) -> Option<Template>;
+    async fn get_template_by_uuid<R: Runtime>(
+        app_handle: AppHandle<R>,
+        id: String
+    ) -> ApiResult<Option<Template>>;
+    async fn get_template_by_friendly_id<R: Runtime>(
+        app_handle: AppHandle<R>,
+        id: String
+    ) -> ApiResult<Option<Template>>;
+    async fn all_templates<R: Runtime>(
+        app_handle: AppHandle<R>
+    ) -> ApiResult<Vec<TemplateMetadata>>;
+    async fn package_templates<R: Runtime>(
+        app_handle: AppHandle<R>,
+        pkg: PackageId
+    ) -> ApiResult<Vec<TemplateMetadata>>;
+    async fn create_template<R: Runtime>(
+        app_handle: AppHandle<R>,
+        model: CreateTemplateModel
+    ) -> ApiResult<Template>;
 }
 
 #[derive(Clone)]
@@ -10,8 +55,113 @@ pub struct TemplateApiImpl;
 
 #[taurpc::resolvers]
 impl TemplateApi for TemplateApiImpl {
-    // Stub to check type conversion
-    async fn get_template(self, _id: String) -> Option<Template> {
-        None
+    async fn get_template_by_uuid<R: Runtime>(
+        self,
+        app_handle: AppHandle<R>,
+        id: String
+    ) -> ApiResult<Option<Template>> {
+        let db = app_handle.carcosa().current_database()?;
+        let txn = db.r_transaction()?;
+        match txn.get().primary(Identifier::from(id)) {
+            Ok(r) => Ok(r),
+            Err(e) => {
+                println!("{e:?}");
+                Err(e)?
+            }
+        }
+    }
+    async fn get_template_by_friendly_id<R: Runtime>(
+        self,
+        app_handle: AppHandle<R>,
+        id: String
+    ) -> ApiResult<Option<Template>> {
+        let db = app_handle.carcosa().current_database()?;
+        let txn = db.r_transaction()?;
+        Ok(txn.get().secondary(TemplateKey::friendly_id, id)?)
+    }
+    async fn create_template<R: Runtime>(
+        self,
+        app_handle: AppHandle<R>,
+        model: CreateTemplateModel
+    ) -> ApiResult<Template> {
+        let CreateTemplateModel { icon, name, description, layout, inherit } = model;
+        let friendly_id: String = name
+            .clone()
+            .to_case(Case::Snake)
+            .chars()
+            .filter_map(|c| (
+                if c.is_alphanumeric() || c == '_' || c == '.' || c == '-' {
+                    Some(c)
+                } else {
+                    None
+                }
+            ))
+            .collect();
+
+        let resolved_layout = match layout {
+            AllTemplateLayouts::Predefined(template_layout) =>
+                TemplateLayout::Predefined {
+                    header_root_children: vec![],
+                    layout_type: template_layout,
+                },
+            AllTemplateLayouts::Form(FormTyper::Form) => TemplateLayout::Form { inherit, root_children: vec![] },
+        };
+        let new_template = Template {
+            id: Identifier::new(),
+            friendly_id,
+            name,
+            package: PackageId::project(),
+            icon,
+            description,
+            nodes: HashMap::new(),
+            layout: resolved_layout,
+        };
+        let db = app_handle.carcosa().current_database()?;
+        let txn = db.rw_transaction()?;
+        txn.insert(new_template.clone())?;
+        txn.commit()?;
+        Ok(new_template)
+    }
+
+    async fn all_templates<R: Runtime>(
+        self,
+        app_handle: AppHandle<R>
+    ) -> ApiResult<Vec<TemplateMetadata>> {
+        let db = app_handle.carcosa().current_database()?;
+        let txn = db.r_transaction()?;
+        let results: Vec<Template> = txn
+            .scan()
+            .primary()?
+            .all()?
+            .filter_map(|r| if let Ok(v) = r { Some(v) } else { None })
+            .collect();
+
+        Ok(
+            results
+                .into_iter()
+                .map(|v| TemplateMetadata::from(v))
+                .collect()
+        )
+    }
+    async fn package_templates<R: Runtime>(
+        self,
+        app_handle: AppHandle<R>,
+        pkg: PackageId
+    ) -> ApiResult<Vec<TemplateMetadata>> {
+        let db = app_handle.carcosa().current_database()?;
+        let txn = db.r_transaction()?;
+        let results: Vec<Template> = txn
+            .scan()
+            .secondary(TemplateKey::package)?
+            .range(pkg.clone()..=pkg.clone())?
+            .filter_map(|r| if let Ok(v) = r { Some(v) } else { None })
+            .collect();
+
+        Ok(
+            results
+                .into_iter()
+                .map(|v| TemplateMetadata::from(v))
+                .collect()
+        )
     }
 }

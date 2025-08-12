@@ -1,6 +1,8 @@
 import { notifications } from "@mantine/notifications";
 import { useTranslation } from "react-i18next";
 import { TbCircleCheckFilled, TbCircleXFilled } from "react-icons/tb";
+import { SerializableError } from "../bindings";
+import { writeError } from "./api";
 
 export function useNotifications() {
     const { t } = useTranslation();
@@ -20,5 +22,13 @@ export function useNotifications() {
                 title: t("common.notif.error"),
                 message: message,
             }),
+        fromError: (error: SerializableError) => {
+            notifications.show({
+                icon: <TbCircleXFilled />,
+                color: "red",
+                title: t("common.notif.error"),
+                message: writeError(error, t),
+            });
+        },
     };
 }
