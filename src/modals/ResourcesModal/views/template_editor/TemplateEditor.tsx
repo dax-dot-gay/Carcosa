@@ -1,27 +1,19 @@
-import api, {
-    Node,
-    SerializableError,
-    Template,
-    TemplateLayout,
-    writeError,
-} from "@/api";
+import api, { Node, SerializableError, Template, writeError } from "@/api";
 import { IconSelector } from "@/components/DynamicIcons";
 import { useParams } from "@/context/routing";
+import { useTemplateManager } from "@/templates/templateManager";
 import {
     Alert,
     Box,
     Button,
     Center,
-    Divider,
     Group,
     Loader,
     ScrollArea,
-    Skeleton,
     Stack,
     Textarea,
     TextInput,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TbCancel, TbDeviceFloppy, TbPencil, TbX } from "react-icons/tb";
@@ -33,28 +25,15 @@ type TemplateEditorParams = {
 
 function TemplateEditorInterface({
     mode,
-    template,
+    template: initialTemplate,
 }: {
     mode: string;
     template: Template;
 }) {
     const { t } = useTranslation();
 
-    const state = useForm<{
-        icon: string | null;
-        name: string;
-        description: string;
-        layout: TemplateLayout;
-        nodes: Partial<{ [key in string]: Node }>;
-    }>({
-        initialValues: {
-            icon: template.icon ?? null,
-            name: template.name,
-            description: template.description ?? "",
-            layout: template.layout,
-            nodes: template.nodes ?? {},
-        },
-    });
+    const { template, modify, setMeta } = useTemplateManager(initialTemplate);
+
     return (
         <Stack
             gap="sm"
@@ -70,10 +49,12 @@ function TemplateEditorInterface({
                     size={42}
                     variant="light"
                     iconSize={24}
-                    {...state.getInputProps("icon")}
+                    value={template.icon}
+                    onChange={(value) => setMeta("icon", value)}
                 />
                 <TextInput
-                    {...state.getInputProps("name")}
+                    value={template.name}
+                    onChange={(evt) => setMeta("name", evt.target.value)}
                     variant="filled"
                     placeholder={t("modals.resources.views.templates.name")}
                     size="md"
@@ -82,7 +63,13 @@ function TemplateEditorInterface({
                 />
             </Group>
             <Textarea
-                {...state.getInputProps("description")}
+                value={template.description ?? ""}
+                onChange={(evt) =>
+                    setMeta(
+                        "description",
+                        evt.target.value.length === 0 ? null : evt.target.value,
+                    )
+                }
                 w="calc(100% - 2 * var(--mantine-spacing-sm))"
                 rows={2}
                 placeholder={t("modals.resources.views.templates.description")}

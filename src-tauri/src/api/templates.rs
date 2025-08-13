@@ -10,9 +10,9 @@ use crate::{
     carcosa::CarcosaExt,
     models::{ keys::TemplateKey, Template },
     templates::{
-        types::{ AllTemplateLayouts, FormTyper, PackageId, TemplateMetadata },
+        types::{ PackageId, TemplateMetadata },
         Identifier,
-        TemplateLayout,
+        LayoutKind
     },
 };
 
@@ -21,10 +21,10 @@ pub struct CreateTemplateModel {
     pub icon: Option<String>,
     pub name: String,
     pub description: Option<String>,
-    pub layout: AllTemplateLayouts,
+    pub layout: LayoutKind,
 
     #[serde(default)]
-    pub inherit: Option<(PackageId, Identifier)>,
+    pub inherit: Option<Identifier>,
 }
 
 #[taurpc::procedures(path = "templates", event_trigger = TemplateEventTrigger)]
@@ -100,15 +100,6 @@ impl TemplateApi for TemplateApiImpl {
                 }
             ))
             .collect();
-
-        let resolved_layout = match layout {
-            AllTemplateLayouts::Predefined(template_layout) =>
-                TemplateLayout::Predefined {
-                    header_root_children: vec![],
-                    layout_type: template_layout,
-                },
-            AllTemplateLayouts::Form(FormTyper::Form) => TemplateLayout::Form { inherit, root_children: vec![] },
-        };
         let new_template = Template {
             id: Identifier::new(),
             friendly_id,
@@ -117,7 +108,9 @@ impl TemplateApi for TemplateApiImpl {
             icon,
             description,
             nodes: HashMap::new(),
-            layout: resolved_layout,
+            layout,
+            inherit,
+            root_children: vec![]
         };
         let db = app_handle.carcosa().current_database()?;
         let txn = db.rw_transaction()?;

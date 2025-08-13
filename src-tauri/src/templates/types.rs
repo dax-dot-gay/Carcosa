@@ -5,7 +5,7 @@ use serde_json::{ Number, Value };
 use specta::Type;
 use uuid::Uuid;
 
-use crate::{ models::Template, templates::TemplateLayout };
+use crate::{ models::Template, templates::LayoutKind };
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 #[serde(rename_all = "snake_case", tag = "kind")]
@@ -373,19 +373,6 @@ impl ToKey for PackageId {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
-#[serde(rename_all = "snake_case")]
-pub enum FormTyper {
-    Form
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Type)]
-#[serde(rename_all = "snake_case", untagged)]
-pub enum AllTemplateLayouts {
-    Form(FormTyper),
-    Predefined(super::PredefinedLayout),
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct TemplateMetadata {
     pub id: Identifier,
     pub friendly_id: String,
@@ -393,8 +380,8 @@ pub struct TemplateMetadata {
     pub icon: Option<String>,
     pub name: String,
     pub description: Option<String>,
-    pub layout: AllTemplateLayouts,
-    pub inherit: Option<(PackageId, Identifier)>,
+    pub layout: LayoutKind,
+    pub inherit: Option<Identifier>,
 }
 
 impl From<Template> for TemplateMetadata {
@@ -406,16 +393,8 @@ impl From<Template> for TemplateMetadata {
             icon: value.icon.clone(),
             name: value.name.clone(),
             description: value.description.clone(),
-            layout: match value.layout.clone() {
-                TemplateLayout::Predefined { layout_type, .. } =>
-                    AllTemplateLayouts::Predefined(layout_type),
-                TemplateLayout::Form { .. } => AllTemplateLayouts::Form(FormTyper::Form),
-            },
-            inherit: if let TemplateLayout::Form { inherit, .. } = value.layout.clone() {
-                inherit
-            } else {
-                None
-            },
+            layout: value.layout.clone(),
+            inherit: value.inherit.clone()
         }
     }
 }

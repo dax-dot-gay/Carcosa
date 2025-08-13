@@ -1,4 +1,4 @@
-import api, { PredefinedLayout, SerializableError } from "@/api";
+import api, { LayoutKind, SerializableError } from "@/api";
 import { IconSelector } from "@/components/DynamicIcons";
 import { useNavigate } from "@/context/routing";
 import { useNotifications } from "@/notifications";
@@ -12,11 +12,8 @@ import {
     Paper,
     Text,
     Button,
-    SegmentedControl,
-    Select,
     useCombobox,
     Combobox,
-    Input,
     InputBase,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -37,7 +34,7 @@ import {
     TbX,
 } from "react-icons/tb";
 
-const layoutIcons: { [key in PredefinedLayout | "form"]: IconType } = {
+const layoutIcons: { [key in LayoutKind]: IconType } = {
     form: TbForms,
     rich_document: TbFileText,
     interactable_map: TbMap2,
@@ -45,7 +42,7 @@ const layoutIcons: { [key in PredefinedLayout | "form"]: IconType } = {
     timeline: TbTimelineEventExclamation,
 };
 
-function LayoutOption({ mode }: { mode: PredefinedLayout | "form" }) {
+function LayoutOption({ mode }: { mode: LayoutKind }) {
     const Icon = layoutIcons[mode];
     const { t } = useTranslation();
     return (
@@ -67,8 +64,8 @@ function LayoutSelector({
     value,
     onChange,
 }: {
-    value: PredefinedLayout | "form";
-    onChange: (layout: PredefinedLayout | "form") => void;
+    value: LayoutKind;
+    onChange: (layout: LayoutKind) => void;
 }) {
     const { t } = useTranslation();
     const combobox = useCombobox({
@@ -125,7 +122,7 @@ export function TemplateCreator() {
         icon: string | null;
         name: string;
         description: string;
-        layout: PredefinedLayout | "form";
+        layout: LayoutKind;
     }>({
         initialValues: {
             icon: "tb_template",

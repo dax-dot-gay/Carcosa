@@ -7,7 +7,7 @@ import {
 type TAURI_CHANNEL<T> = (response: T) => void;
 
 export type Alert = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     content: string;
     level?: AlertLevel;
@@ -16,10 +16,8 @@ export type Alert = {
 
 export type AlertLevel = "default" | "info" | "success" | "warning" | "error";
 
-export type AllTemplateLayouts = FormTyper | PredefinedLayout;
-
 export type Collapsible = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     children: Identifier[];
     default_collapsed: boolean;
@@ -30,7 +28,7 @@ export type Collapsible = {
 export type ColorScheme = "light" | "dark";
 
 export type Columns = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     children: Identifier[];
     columns: Identifier[][];
@@ -52,8 +50,8 @@ export type CreateTemplateModel = {
     icon: string | null;
     name: string;
     description: string | null;
-    layout: AllTemplateLayouts;
-    inherit?: [PackageId, Identifier] | null;
+    layout: LayoutKind;
+    inherit?: Identifier | null;
 };
 
 export type FieldNode =
@@ -65,8 +63,6 @@ export type FieldNode =
     | ({ node_kind: "rich_text" } & RichText)
     | ({ node_kind: "linked_document" } & LinkedDocument)
     | ({ node_kind: "multi_linked_documents" } & MultiLinkedDocuments);
-
-export type FormTyper = "form";
 
 export type Identifier = string;
 
@@ -81,15 +77,22 @@ export type JsonValue =
     | Partial<{ [key in string]: JsonValue }>;
 
 export type LabelledGroup = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     children: Identifier[];
     label: string;
     icon?: string | null;
 };
 
+export type LayoutKind =
+    | "form"
+    | "rich_document"
+    | "interactable_map"
+    | "calendar"
+    | "timeline";
+
 export type LinkedDocument = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     key: string;
     label?: string | null;
@@ -103,7 +106,7 @@ export type MatchCriteria =
     | { template_id: Identifier };
 
 export type MultiLinkedDocuments = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     key: string;
     label?: string | null;
@@ -114,7 +117,7 @@ export type MultiLinkedDocuments = {
 };
 
 export type MultiSelect = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     key: string;
     label?: string | null;
@@ -132,7 +135,7 @@ export type Node =
     | ({ node_category: "field" } & FieldNode);
 
 export type NumberField = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     key: string;
     label?: string | null;
@@ -152,12 +155,6 @@ export type OtherNode =
 
 export type PackageId = InnerPackageId | string;
 
-export type PredefinedLayout =
-    | "rich_document"
-    | "interactable_map"
-    | "calendar"
-    | "timeline";
-
 export type ProjectConfiguration = {
     name: string;
     description?: string | null;
@@ -167,7 +164,7 @@ export type ProjectConfiguration = {
 };
 
 export type RichText = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     key: string;
     label?: string | null;
@@ -197,7 +194,7 @@ export type SerializableError =
       };
 
 export type SingleSelect = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     key: string;
     label?: string | null;
@@ -228,7 +225,7 @@ export type StateValue =
     | { key: "resource_manager_sidebar_width"; value: number };
 
 export type Switch = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     key: string;
     label?: string | null;
@@ -240,27 +237,17 @@ export type Switch = {
 };
 
 export type Template = {
-    id?: Identifier;
+    id: Identifier;
     friendly_id: string;
     name: string;
     package: PackageId;
-    icon?: string | null;
-    description?: string | null;
-    nodes?: Partial<{ [key in string]: Node }>;
-    layout: TemplateLayout;
+    inherit: Identifier | null;
+    icon: string | null;
+    description: string | null;
+    nodes: Partial<{ [key in string]: Node }>;
+    root_children: string[];
+    layout: LayoutKind;
 };
-
-export type TemplateLayout =
-    | {
-          layout: "predefined";
-          header_root_children: Identifier[];
-          layout_type: PredefinedLayout;
-      }
-    | {
-          layout: "form";
-          inherit: [PackageId, Identifier] | null;
-          root_children: Identifier[];
-      };
 
 export type TemplateMetadata = {
     id: Identifier;
@@ -269,18 +256,18 @@ export type TemplateMetadata = {
     icon: string | null;
     name: string;
     description: string | null;
-    layout: AllTemplateLayouts;
-    inherit: [PackageId, Identifier] | null;
+    layout: LayoutKind;
+    inherit: Identifier | null;
 };
 
 export type Text = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     content: string;
 };
 
 export type TextField = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     key: string;
     label?: string | null;
@@ -301,7 +288,7 @@ export type ValueType =
     | { kind: "identifier" };
 
 export type Wrapper = {
-    id?: Identifier;
+    id: Identifier;
     parent?: Identifier | null;
     children: Identifier[];
 };

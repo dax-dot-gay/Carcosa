@@ -27,7 +27,6 @@ macro_rules! impl_node {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct Text {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -50,7 +49,6 @@ pub enum AlertLevel {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct Alert {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]

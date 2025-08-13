@@ -33,7 +33,6 @@ macro_rules! impl_node {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct Columns {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -46,7 +45,6 @@ impl_node!(Columns, "columns");
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct Collapsible {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -63,7 +61,6 @@ impl_node!(Collapsible, "collapsible");
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct LabelledGroup {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -79,7 +76,6 @@ impl_node!(LabelledGroup, "labelled_group");
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct Wrapper {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]

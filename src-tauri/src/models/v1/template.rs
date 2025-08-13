@@ -6,14 +6,14 @@ use serde::{ Deserialize, Serialize };
 use specta::Type;
 use native_model::Model;
 
-use crate::templates::{ types::PackageId, Identifier, Node, TemplateLayout };
+use crate::templates::{ types::PackageId, Identifier, Node, LayoutKind };
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 #[native_model(id = 2, version = 1, with = crate::models::MsgPack)]
 #[native_db]
 pub struct Template {
     #[primary_key]
-    #[serde(default)]
+    #[specta(optional = false, default = false)]
     pub id: Identifier,
 
     #[secondary_key(unique)]
@@ -25,13 +25,12 @@ pub struct Template {
     #[secondary_key]
     pub package: PackageId,
 
-    #[serde(default)]
+    #[secondary_key]
+    pub inherit: Option<Identifier>,
+
     pub icon: Option<String>,
-
-    #[serde(default)]
     pub description: Option<String>,
-
-    #[serde(default)]
     pub nodes: HashMap<String, Node>,
-    pub layout: TemplateLayout,
+    pub root_children: Vec<String>,
+    pub layout: LayoutKind
 }

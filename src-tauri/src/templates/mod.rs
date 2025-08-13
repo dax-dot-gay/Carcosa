@@ -8,7 +8,7 @@ use serde_json::Value;
 use specta::Type;
 pub use types::{ FromValue, ValueType, NodeCategory, Identifier };
 
-use crate::templates::{containers::ContainerNode, fields::FieldNode, other_nodes::OtherNode, types::PackageId};
+use crate::templates::{containers::ContainerNode, fields::FieldNode, other_nodes::OtherNode};
 
 pub trait TemplateNode {
     fn id(&self) -> Identifier;
@@ -46,22 +46,10 @@ pub enum Node {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 #[serde(rename_all = "snake_case")]
-pub enum PredefinedLayout {
+pub enum LayoutKind {
+    Form,
     RichDocument,
     InteractableMap,
     Calendar,
     Timeline
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Type)]
-#[serde(rename_all = "snake_case", tag = "layout")]
-pub enum TemplateLayout {
-    Predefined {
-        header_root_children: Vec<Identifier>,
-        layout_type: PredefinedLayout,
-    },
-    Form {
-        inherit: Option<(PackageId, Identifier)>,
-        root_children: Vec<Identifier>
-    }
 }

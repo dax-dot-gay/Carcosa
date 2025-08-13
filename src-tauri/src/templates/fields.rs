@@ -52,7 +52,6 @@ macro_rules! impl_field {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct TextField {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -87,7 +86,6 @@ impl_field! {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct NumberField {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -134,7 +132,6 @@ impl_field! {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct Switch {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -172,7 +169,6 @@ impl_field! {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct SingleSelect {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -209,7 +205,6 @@ impl_field! {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct MultiSelect {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -249,7 +244,6 @@ impl_field! {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct MultiLine {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -287,7 +281,6 @@ impl_field! {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct RichText {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -329,7 +322,6 @@ pub enum MatchCriteria {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct LinkedDocument {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
@@ -361,7 +353,6 @@ impl_field! {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct MultiLinkedDocuments {
-    #[serde(default)]
     pub id: Identifier,
 
     #[serde(default)]
