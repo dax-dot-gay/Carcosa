@@ -27,7 +27,7 @@ pub struct CreateTemplateModel {
     pub inherit: Option<(PackageId, Identifier)>,
 }
 
-#[taurpc::procedures(path = "templates")]
+#[taurpc::procedures(path = "templates", event_trigger = TemplateEventTrigger)]
 pub trait TemplateApi {
     async fn get_template_by_uuid<R: Runtime>(
         app_handle: AppHandle<R>,
@@ -48,6 +48,9 @@ pub trait TemplateApi {
         app_handle: AppHandle<R>,
         model: CreateTemplateModel
     ) -> ApiResult<Template>;
+
+    #[taurpc(event)]
+    async fn created_template(template: TemplateMetadata);
 }
 
 #[derive(Clone)]
@@ -120,6 +123,8 @@ impl TemplateApi for TemplateApiImpl {
         let txn = db.rw_transaction()?;
         txn.insert(new_template.clone())?;
         txn.commit()?;
+
+        app_handle.carcosa().events().templates().created_template(new_template.clone().into())?;
         Ok(new_template)
     }
 

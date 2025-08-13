@@ -104,7 +104,9 @@
   "actions": {
     "cancel": "Cancel",
     "create": "Create",
-    "import": "Import"
+    "import": "Import",
+    "exit": "Exit",
+    "save": "Save"
   },
   "errors": {
     "form": {

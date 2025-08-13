@@ -2,6 +2,7 @@ import api, { TemplateMetadata } from "@/api";
 import { DynamicIcon } from "@/components/DynamicIcons";
 import { usePersistedState } from "@/context/init";
 import { Outlet, useNavigate } from "@/context/routing";
+import { useEvent } from "@/events";
 import { Split } from "@gfazioli/mantine-split-pane";
 import {
     Stack,
@@ -91,6 +92,10 @@ export function ModalLayout() {
     useEffect(() => {
         api.templates.package_templates("::project").then(setProjectTemplates);
     }, [setProjectTemplates]);
+
+    useEvent(api.templates.created_template, () =>
+        api.templates.package_templates("::project").then(setProjectTemplates),
+    );
 
     return (
         <Split

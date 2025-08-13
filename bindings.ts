@@ -312,7 +312,7 @@ const ARGS_MAP = {
     "application.icons":
         '{"all_icons":[],"icon":["icon"],"icon_categories":[],"icons":["icons"],"icons_in_category":["category"]}',
     templates:
-        '{"all_templates":[],"create_template":["model"],"get_template_by_friendly_id":["id"],"get_template_by_uuid":["id"],"package_templates":["pkg"]}',
+        '{"all_templates":[],"create_template":["model"],"created_template":["template"],"get_template_by_friendly_id":["id"],"get_template_by_uuid":["id"],"package_templates":["pkg"]}',
 };
 export type Router = {
     application: {
@@ -345,6 +345,7 @@ export type Router = {
     templates: {
         all_templates: () => Promise<TemplateMetadata[]>;
         create_template: (model: CreateTemplateModel) => Promise<Template>;
+        created_template: (template: TemplateMetadata) => Promise<void>;
         get_template_by_friendly_id: (id: string) => Promise<Template | null>;
         get_template_by_uuid: (id: string) => Promise<Template | null>;
         package_templates: (pkg: PackageId) => Promise<TemplateMetadata[]>;
