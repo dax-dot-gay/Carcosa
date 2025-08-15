@@ -8,7 +8,9 @@ type TAURI_CHANNEL<T> = (response: T) => void;
 
 export type Alert = {
     id: Identifier;
-    parent?: Identifier | null;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     content: string;
     level?: AlertLevel;
     title?: string | null;
@@ -18,8 +20,9 @@ export type AlertLevel = "default" | "info" | "success" | "warning" | "error";
 
 export type Collapsible = {
     id: Identifier;
-    parent?: Identifier | null;
-    children: Identifier[];
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     default_collapsed: boolean;
     title: string;
     icon?: string | null;
@@ -29,9 +32,10 @@ export type ColorScheme = "light" | "dark";
 
 export type Columns = {
     id: Identifier;
-    parent?: Identifier | null;
-    children: Identifier[];
-    columns: Identifier[][];
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
+    columns: number;
 };
 
 export type ContainerNode =
@@ -78,8 +82,9 @@ export type JsonValue =
 
 export type LabelledGroup = {
     id: Identifier;
-    parent?: Identifier | null;
-    children: Identifier[];
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     label: string;
     icon?: string | null;
 };
@@ -93,7 +98,9 @@ export type LayoutKind =
 
 export type LinkedDocument = {
     id: Identifier;
-    parent?: Identifier | null;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     key: string;
     label?: string | null;
     icon?: string | null;
@@ -107,7 +114,9 @@ export type MatchCriteria =
 
 export type MultiLinkedDocuments = {
     id: Identifier;
-    parent?: Identifier | null;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     key: string;
     label?: string | null;
     icon?: string | null;
@@ -118,7 +127,9 @@ export type MultiLinkedDocuments = {
 
 export type MultiSelect = {
     id: Identifier;
-    parent?: Identifier | null;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     key: string;
     label?: string | null;
     icon?: string | null;
@@ -129,14 +140,25 @@ export type MultiSelect = {
     max_selections?: number | null;
 };
 
-export type Node =
+export type Node = {
+    id: Identifier;
+    template: Identifier;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
+    node: NodeDesc;
+};
+
+export type NodeDesc =
     | ({ node_category: "other" } & OtherNode)
     | ({ node_category: "container" } & ContainerNode)
     | ({ node_category: "field" } & FieldNode);
 
 export type NumberField = {
     id: Identifier;
-    parent?: Identifier | null;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     key: string;
     label?: string | null;
     icon?: string | null;
@@ -155,6 +177,10 @@ export type OtherNode =
 
 export type PackageId = InnerPackageId | string;
 
+export type Parent =
+    | { placement: "root" }
+    | { placement: "child"; parent: Identifier; collection: string };
+
 export type ProjectConfiguration = {
     name: string;
     description?: string | null;
@@ -165,7 +191,9 @@ export type ProjectConfiguration = {
 
 export type RichText = {
     id: Identifier;
-    parent?: Identifier | null;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     key: string;
     label?: string | null;
     icon?: string | null;
@@ -195,7 +223,9 @@ export type SerializableError =
 
 export type SingleSelect = {
     id: Identifier;
-    parent?: Identifier | null;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     key: string;
     label?: string | null;
     icon?: string | null;
@@ -226,7 +256,9 @@ export type StateValue =
 
 export type Switch = {
     id: Identifier;
-    parent?: Identifier | null;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     key: string;
     label?: string | null;
     icon?: string | null;
@@ -244,8 +276,6 @@ export type Template = {
     inherit: Identifier | null;
     icon: string | null;
     description: string | null;
-    nodes: Partial<{ [key in string]: Node }>;
-    root_children: string[];
     layout: LayoutKind;
 };
 
@@ -262,13 +292,17 @@ export type TemplateMetadata = {
 
 export type Text = {
     id: Identifier;
-    parent?: Identifier | null;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     content: string;
 };
 
 export type TextField = {
     id: Identifier;
-    parent?: Identifier | null;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
     key: string;
     label?: string | null;
     icon?: string | null;
@@ -289,8 +323,9 @@ export type ValueType =
 
 export type Wrapper = {
     id: Identifier;
-    parent?: Identifier | null;
-    children: Identifier[];
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
 };
 
 const ARGS_MAP = {
@@ -299,7 +334,7 @@ const ARGS_MAP = {
     "application.icons":
         '{"all_icons":[],"icon":["icon"],"icon_categories":[],"icons":["icons"],"icons_in_category":["category"]}',
     templates:
-        '{"all_templates":[],"create_template":["model"],"created_template":["template"],"get_template_by_friendly_id":["id"],"get_template_by_uuid":["id"],"package_templates":["pkg"]}',
+        '{"all_templates":[],"create_node":["template","node"],"create_template":["model"],"created_template":["template"],"get_template_by_friendly_id":["id"],"get_template_by_uuid":["id"],"package_templates":["pkg"]}',
 };
 export type Router = {
     application: {
@@ -331,6 +366,7 @@ export type Router = {
     };
     templates: {
         all_templates: () => Promise<TemplateMetadata[]>;
+        create_node: (template: string, node: NodeDesc) => Promise<Node>;
         create_template: (model: CreateTemplateModel) => Promise<Template>;
         created_template: (template: TemplateMetadata) => Promise<void>;
         get_template_by_friendly_id: (id: string) => Promise<Template | null>;

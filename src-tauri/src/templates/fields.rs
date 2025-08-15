@@ -1,8 +1,9 @@
 use serde::{ Deserialize, Serialize };
 use serde_json::Value;
 use specta::Type;
+use spire_enum::prelude::{delegate_impl, delegated_enum};
 
-use crate::templates::{ Identifier, TemplateNode, TemplateField, ValueType };
+use crate::templates::{ Identifier, TemplateNode, TemplateField, ValueType, types::Parent };
 
 macro_rules! impl_node {
     ($node:ty, $kind:literal) => {
@@ -16,11 +17,19 @@ macro_rules! impl_node {
             }
 
             fn node_category(&self) -> super::NodeCategory {
-                super::NodeCategory::Field
+                super::NodeCategory::Container
             }
 
-            fn parent(&self) -> Option<Identifier> {
+            fn parent(&self) -> Parent {
                 self.parent.clone()
+            }
+
+            fn next(&self) -> Option<Identifier> {
+                self.next.clone()
+            }
+
+            fn previous(&self) -> Option<Identifier> {
+                self.previous.clone()
             }
         }
     };
@@ -54,8 +63,9 @@ macro_rules! impl_field {
 pub struct TextField {
     pub id: Identifier,
 
-    #[serde(default)]
-    pub parent: Option<Identifier>,
+    pub parent: Parent,
+    pub previous: Option<Identifier>,
+    pub next: Option<Identifier>,
 
     pub key: String,
 
@@ -88,8 +98,9 @@ impl_field! {
 pub struct NumberField {
     pub id: Identifier,
 
-    #[serde(default)]
-    pub parent: Option<Identifier>,
+    pub parent: Parent,
+    pub previous: Option<Identifier>,
+    pub next: Option<Identifier>,
 
     pub key: String,
 
@@ -134,8 +145,9 @@ impl_field! {
 pub struct Switch {
     pub id: Identifier,
 
-    #[serde(default)]
-    pub parent: Option<Identifier>,
+    pub parent: Parent,
+    pub previous: Option<Identifier>,
+    pub next: Option<Identifier>,
 
     pub key: String,
 
@@ -171,8 +183,9 @@ impl_field! {
 pub struct SingleSelect {
     pub id: Identifier,
 
-    #[serde(default)]
-    pub parent: Option<Identifier>,
+    pub parent: Parent,
+    pub previous: Option<Identifier>,
+    pub next: Option<Identifier>,
 
     pub key: String,
 
@@ -207,8 +220,9 @@ impl_field! {
 pub struct MultiSelect {
     pub id: Identifier,
 
-    #[serde(default)]
-    pub parent: Option<Identifier>,
+    pub parent: Parent,
+    pub previous: Option<Identifier>,
+    pub next: Option<Identifier>,
 
     pub key: String,
 
@@ -246,8 +260,9 @@ impl_field! {
 pub struct MultiLine {
     pub id: Identifier,
 
-    #[serde(default)]
-    pub parent: Option<Identifier>,
+    pub parent: Parent,
+    pub previous: Option<Identifier>,
+    pub next: Option<Identifier>,
 
     pub key: String,
 
@@ -283,8 +298,9 @@ impl_field! {
 pub struct RichText {
     pub id: Identifier,
 
-    #[serde(default)]
-    pub parent: Option<Identifier>,
+    pub parent: Parent,
+    pub previous: Option<Identifier>,
+    pub next: Option<Identifier>,
 
     pub key: String,
 
@@ -324,8 +340,9 @@ pub enum MatchCriteria {
 pub struct LinkedDocument {
     pub id: Identifier,
 
-    #[serde(default)]
-    pub parent: Option<Identifier>,
+    pub parent: Parent,
+    pub previous: Option<Identifier>,
+    pub next: Option<Identifier>,
 
     pub key: String,
 
@@ -355,8 +372,9 @@ impl_field! {
 pub struct MultiLinkedDocuments {
     pub id: Identifier,
 
-    #[serde(default)]
-    pub parent: Option<Identifier>,
+    pub parent: Parent,
+    pub previous: Option<Identifier>,
+    pub next: Option<Identifier>,
 
     pub key: String,
 
@@ -385,6 +403,9 @@ impl_field! {
     }
 }
 
+#[delegated_enum(
+    impl_conversions
+)]
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 #[serde(rename_all = "snake_case", tag = "node_kind")]
 pub enum FieldNode {
@@ -396,4 +417,21 @@ pub enum FieldNode {
     RichText(RichText),
     LinkedDocument(LinkedDocument),
     MultiLinkedDocuments(MultiLinkedDocuments),
+}
+
+#[delegate_impl]
+impl TemplateNode for FieldNode {
+    fn id(&self) -> Identifier;
+    fn node_kind(&self) -> String;
+    fn node_category(&self) -> super::NodeCategory;
+    fn parent(&self) -> Parent;
+    fn previous(&self) -> Option<Identifier>;
+    fn next(&self) -> Option<Identifier>;
+}
+
+#[delegate_impl]
+impl TemplateField for FieldNode {
+    fn key(&self) -> String;
+    fn value_type(&self) -> ValueType;
+    fn default_value(&self) -> Value;
 }

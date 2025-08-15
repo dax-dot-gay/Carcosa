@@ -398,3 +398,35 @@ impl From<Template> for TemplateMetadata {
         }
     }
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
+#[serde(rename_all = "snake_case", tag = "placement")]
+pub enum Parent {
+    Root,
+    Child {parent: Identifier, collection: String}
+}
+
+impl Default for Parent {
+    fn default() -> Self {
+        Self::Root
+    }
+}
+
+impl ToKey for Parent {
+    fn key_names() -> Vec<String> {
+        vec!["Parent".to_string()]
+    }
+
+    fn to_key(&self) -> Key {
+        Key::new(self.to_string().as_bytes().to_vec())
+    }
+}
+
+impl Display for Parent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&match self.clone() {
+            Parent::Root => format!("root::root/root"),
+            Parent::Child { parent, collection } => format!("child::{}/{}", parent.to_string(), collection),
+        })
+    }
+}

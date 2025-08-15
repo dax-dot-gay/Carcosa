@@ -76,7 +76,7 @@ macro_rules! models {
 models! {
     versions = v1;
     selected_version = v1;
-    models = ProjectConfiguration, Template;
+    models = ProjectConfiguration, Template, Node;
 }
 
 pub struct MsgPack;

@@ -1,7 +1,6 @@
-import api, { Node, SerializableError, Template, writeError } from "@/api";
+import api, { SerializableError, Template, writeError } from "@/api";
 import { IconSelector } from "@/components/DynamicIcons";
 import { useParams } from "@/context/routing";
-import { useTemplateManager } from "@/templates/templateManager";
 import {
     Alert,
     Box,
@@ -14,6 +13,7 @@ import {
     Textarea,
     TextInput,
 } from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TbCancel, TbDeviceFloppy, TbPencil, TbX } from "react-icons/tb";
@@ -31,8 +31,7 @@ function TemplateEditorInterface({
     template: Template;
 }) {
     const { t } = useTranslation();
-
-    const { template, modify, setMeta } = useTemplateManager(initialTemplate);
+    const form = useForm({ initialValues: initialTemplate });
 
     return (
         <Stack
@@ -49,12 +48,10 @@ function TemplateEditorInterface({
                     size={42}
                     variant="light"
                     iconSize={24}
-                    value={template.icon}
-                    onChange={(value) => setMeta("icon", value)}
+                    {...form.getInputProps("icon")}
                 />
                 <TextInput
-                    value={template.name}
-                    onChange={(evt) => setMeta("name", evt.target.value)}
+                    {...form.getInputProps("name")}
                     variant="filled"
                     placeholder={t("modals.resources.views.templates.name")}
                     size="md"
@@ -63,13 +60,7 @@ function TemplateEditorInterface({
                 />
             </Group>
             <Textarea
-                value={template.description ?? ""}
-                onChange={(evt) =>
-                    setMeta(
-                        "description",
-                        evt.target.value.length === 0 ? null : evt.target.value,
-                    )
-                }
+                {...form.getInputProps("description")}
                 w="calc(100% - 2 * var(--mantine-spacing-sm))"
                 rows={2}
                 placeholder={t("modals.resources.views.templates.description")}

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use convert_case::{ Case, Casing };
 use serde::{ Deserialize, Serialize };
 use specta::Type;
@@ -8,11 +6,11 @@ use tauri::{ AppHandle, Runtime };
 use crate::{
     api::ApiResult,
     carcosa::CarcosaExt,
-    models::{ keys::TemplateKey, Template },
+    models::{ keys::TemplateKey, Node, Template },
     templates::{
         types::{ PackageId, TemplateMetadata },
         Identifier,
-        LayoutKind
+        LayoutKind, NodeDesc
     },
 };
 
@@ -48,6 +46,7 @@ pub trait TemplateApi {
         app_handle: AppHandle<R>,
         model: CreateTemplateModel
     ) -> ApiResult<Template>;
+    async fn create_node<R: Runtime>(app_handle: AppHandle<R>, template: String, node: NodeDesc) -> ApiResult<Node>;
 
     #[taurpc(event)]
     async fn created_template(template: TemplateMetadata);
@@ -107,10 +106,8 @@ impl TemplateApi for TemplateApiImpl {
             package: PackageId::project(),
             icon,
             description,
-            nodes: HashMap::new(),
             layout,
-            inherit,
-            root_children: vec![]
+            inherit
         };
         let db = app_handle.carcosa().current_database()?;
         let txn = db.rw_transaction()?;
@@ -161,5 +158,9 @@ impl TemplateApi for TemplateApiImpl {
                 .map(|v| TemplateMetadata::from(v))
                 .collect()
         )
+    }
+
+    async fn create_node<R: Runtime>(self, app_handle: AppHandle<R>, template: String, node: NodeDesc) -> ApiResult<Node> {
+        Err(crate::SerializableError::NoActiveProject)
     }
 }

@@ -6,19 +6,22 @@ pub mod other_nodes;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use specta::Type;
+use spire_enum::prelude::{delegate_impl, delegated_enum};
 pub use types::{ FromValue, ValueType, NodeCategory, Identifier };
 
-use crate::templates::{containers::ContainerNode, fields::FieldNode, other_nodes::OtherNode};
+use crate::templates::{containers::ContainerNode, fields::FieldNode, other_nodes::OtherNode, types::Parent};
 
 pub trait TemplateNode {
     fn id(&self) -> Identifier;
     fn node_kind(&self) -> String;
     fn node_category(&self) -> NodeCategory;
-    fn parent(&self) -> Option<Identifier>;
+    fn parent(&self) -> Parent;
+    fn previous(&self) -> Option<Identifier>;
+    fn next(&self) -> Option<Identifier>;
 }
 
 pub trait TemplateContainer: TemplateNode {
-    fn children(&self) -> Vec<Identifier>;
+    fn collections(&self) -> Vec<String>;
 }
 
 pub trait TemplateField: TemplateNode {
@@ -36,12 +39,25 @@ pub trait TemplateField: TemplateNode {
     }
 }
 
+#[delegated_enum(
+    impl_conversions
+)]
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 #[serde(rename_all = "snake_case", tag = "node_category")]
-pub enum Node {
+pub enum NodeDesc {
     Other(OtherNode),
     Container(ContainerNode),
     Field(FieldNode)
+}
+
+#[delegate_impl]
+impl TemplateNode for NodeDesc {
+    fn id(&self) -> Identifier;
+    fn node_kind(&self) -> String;
+    fn node_category(&self) -> NodeCategory;
+    fn parent(&self) -> Parent;
+    fn previous(&self) -> Option<Identifier>;
+    fn next(&self) -> Option<Identifier>;
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
