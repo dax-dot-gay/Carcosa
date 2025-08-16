@@ -28,6 +28,8 @@ pub struct Template {
 
     pub icon: Option<String>,
     pub description: Option<String>,
+
+    #[secondary_key]
     pub layout: LayoutKind
 }
 

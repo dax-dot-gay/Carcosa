@@ -25,7 +25,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .invoke_handler(api::router().into_handler())
         .setup(|app| {
-            let _ = app.carcosa().app_state();
+            let _ = app.application().app_state();
             app.manage(RwLock::new(None::<Arc<RwLock<Database>>>));
 
             Ok(())

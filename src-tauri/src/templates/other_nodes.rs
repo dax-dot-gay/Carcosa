@@ -30,6 +30,21 @@ macro_rules! impl_node {
             fn previous(&self) -> Option<Identifier> {
                 self.previous.clone()
             }
+            fn set_parent(&mut self, parent: Parent) -> () {
+                self.parent = parent;
+            }
+
+            fn set_previous(&mut self, previous: Option<Identifier>) -> () {
+                self.previous = previous;
+            }
+
+            fn set_next(&mut self, next: Option<Identifier>) -> () {
+                self.next = next;
+            }
+
+            fn set_id(&mut self, id: Identifier) -> () {
+                self.id = id;
+            }
         }
     };
 }
@@ -92,4 +107,8 @@ impl TemplateNode for OtherNode {
     fn parent(&self) -> Parent;
     fn previous(&self) -> Option<Identifier>;
     fn next(&self) -> Option<Identifier>;
+    fn set_parent(&mut self, parent: Parent) -> ();
+    fn set_previous(&mut self, previous: Option<Identifier>) -> ();
+    fn set_next(&mut self, next: Option<Identifier>) -> ();
+    fn set_id(&mut self, id: Identifier) -> ();
 }

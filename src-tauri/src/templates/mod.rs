@@ -3,6 +3,7 @@ pub mod fields;
 pub mod containers;
 pub mod other_nodes;
 
+use native_db::ToKey;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use specta::Type;
@@ -16,8 +17,14 @@ pub trait TemplateNode {
     fn node_kind(&self) -> String;
     fn node_category(&self) -> NodeCategory;
     fn parent(&self) -> Parent;
+    fn set_parent(&mut self, parent: Parent) -> ();
     fn previous(&self) -> Option<Identifier>;
+    fn set_previous(&mut self, previous: Option<Identifier>) -> ();
     fn next(&self) -> Option<Identifier>;
+    fn set_next(&mut self, next: Option<Identifier>) -> ();
+
+    /// DON'T USE THIS OTHER THAN TO ENSURE ID IMMUTABILITY!!!
+    fn set_id(&mut self, id: Identifier) -> ();
 }
 
 pub trait TemplateContainer: TemplateNode {
@@ -58,6 +65,10 @@ impl TemplateNode for NodeDesc {
     fn parent(&self) -> Parent;
     fn previous(&self) -> Option<Identifier>;
     fn next(&self) -> Option<Identifier>;
+    fn set_parent(&mut self, parent: Parent) -> ();
+    fn set_previous(&mut self, previous: Option<Identifier>) -> ();
+    fn set_next(&mut self, next: Option<Identifier>) -> ();
+    fn set_id(&mut self, id: Identifier) -> ();
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
@@ -68,4 +79,20 @@ pub enum LayoutKind {
     InteractableMap,
     Calendar,
     Timeline
+}
+
+impl ToKey for LayoutKind {
+    fn key_names() -> Vec<String> {
+        vec!["LayoutKind".to_string()]
+    }
+
+    fn to_key(&self) -> native_db::Key {
+        native_db::Key::new(match self {
+            LayoutKind::Form => "form",
+            LayoutKind::RichDocument => "rich_document",
+            LayoutKind::InteractableMap => "interactable_map",
+            LayoutKind::Calendar => "calendar",
+            LayoutKind::Timeline => "timeline",
+        }.as_bytes().to_vec())
+    }
 }

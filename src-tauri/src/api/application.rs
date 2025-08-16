@@ -69,7 +69,7 @@ impl ApplicationApi for ApplicationApiImpl {
         project: CreateProjectModel
     ) -> Result<ProjectConfiguration, crate::SerializableError> {
         let path = PathBuf::from(project.path.clone());
-        let carcosa = app_handle.carcosa();
+        let carcosa = app_handle.application();
         if path.exists() {
             if path.is_dir() {
                 if path.read_dir()?.next().is_some() {
@@ -88,7 +88,7 @@ impl ApplicationApi for ApplicationApiImpl {
         txn.insert(config.clone())?;
         txn.commit()?;
         app_handle
-            .carcosa()
+            .application()
             .events()
             .application()
             .opened_project(project.path.clone(), config.clone())?;
@@ -102,7 +102,7 @@ impl ApplicationApi for ApplicationApiImpl {
         path: String
     ) -> Result<ProjectConfiguration, crate::SerializableError> {
         let realpath = PathBuf::from(path.clone());
-        let carcosa = app_handle.carcosa();
+        let carcosa = app_handle.application();
         if !realpath.is_dir() {
             return Err(crate::Error::InvalidProjectSelection(path).into());
         }
@@ -116,7 +116,7 @@ impl ApplicationApi for ApplicationApiImpl {
         let txn = db.r_transaction()?;
         if let Some(config) = txn.get().primary::<ProjectConfiguration>("CONFIG")? {
             app_handle
-                .carcosa()
+                .application()
                 .events()
                 .application()
                 .opened_project(path.clone(), config.clone())?;
@@ -134,8 +134,8 @@ impl ApplicationApi for ApplicationApiImpl {
         self,
         app_handle: tauri::AppHandle<R>
     ) -> Result<(), crate::SerializableError> {
-        app_handle.carcosa().set_state(StateValue::CurrentProject(None))?;
-        app_handle.carcosa().events().application().closed_project()?;
+        app_handle.application().set_state(StateValue::CurrentProject(None))?;
+        app_handle.application().events().application().closed_project()?;
         Ok(())
     }
 
@@ -143,7 +143,7 @@ impl ApplicationApi for ApplicationApiImpl {
         self,
         app_handle: tauri::AppHandle<R>
     ) -> Result<ProjectConfiguration, crate::SerializableError> {
-        let db = app_handle.carcosa().current_database()?;
+        let db = app_handle.application().current_database()?;
         let txn = db.r_transaction()?;
         if let Some(config) = txn.get().primary::<ProjectConfiguration>("CONFIG")? {
             Ok(config)
@@ -152,7 +152,7 @@ impl ApplicationApi for ApplicationApiImpl {
                 crate::Error
                     ::CorruptedProject(
                         app_handle
-                            .carcosa()
+                            .application()
                             .current_project_directory()
                             .unwrap()
                             .to_string_lossy()
@@ -169,7 +169,7 @@ impl ApplicationApi for ApplicationApiImpl {
         app_handle: tauri::AppHandle<R>
     ) -> Option<String> {
         app_handle
-            .carcosa()
+            .application()
             .current_project_directory()
             .and_then(|v| Some(v.to_string_lossy().to_string()))
     }
@@ -179,24 +179,24 @@ impl ApplicationApi for ApplicationApiImpl {
         app_handle: tauri::AppHandle<R>,
         key: StateKey
     ) -> Result<Option<StateValue>, crate::SerializableError> {
-        Ok(app_handle.carcosa().get_state(key)?)
+        Ok(app_handle.application().get_state(key)?)
     }
     async fn set_state<R: Runtime>(
         self,
         app_handle: tauri::AppHandle<R>,
         value: StateValue
     ) -> Result<(), crate::SerializableError> {
-        let _ = app_handle.carcosa().set_state(value)?;
+        let _ = app_handle.application().set_state(value)?;
         app_handle
-            .carcosa()
+            .application()
             .events()
             .application()
-            .updated_state(app_handle.carcosa().full_state())?;
+            .updated_state(app_handle.application().full_state())?;
         Ok(())
     }
 
     async fn full_state<R: Runtime>(self, app_handle: tauri::AppHandle<R>) -> State {
-        app_handle.carcosa().full_state()
+        app_handle.application().full_state()
     }
 }
 

@@ -6,16 +6,12 @@ use strum::IntoEnumIterator;
 use tauri::{ AppHandle, Manager, Runtime };
 use tauri_plugin_store::{ Store, StoreExt };
 
-use crate::{api::Events, models::MODELS, types::state::{State, StateKey, StateValue}};
-
-pub trait CarcosaExt<R: Runtime> {
-    fn carcosa(&self) -> Carcosa<R>;
-}
+use crate::{ api::Events, models::MODELS, types::state::{ State, StateKey, StateValue } };
 
 #[derive(Clone)]
-pub struct Carcosa<R: Runtime>(AppHandle<R>);
+pub struct Application<R: Runtime>(AppHandle<R>);
 
-impl<R: Runtime> Carcosa<R> {
+impl<R: Runtime> Application<R> {
     pub fn new(handle: AppHandle<R>) -> Self {
         Self(handle)
     }
@@ -43,10 +39,7 @@ impl<R: Runtime> Carcosa<R> {
         Ok(())
     }
 
-    pub fn get_state(
-        &self,
-        key: StateKey
-    ) -> crate::Result<Option<StateValue>> {
+    pub fn get_state(&self, key: StateKey) -> crate::Result<Option<StateValue>> {
         if let Some(val) = self.app_state().get(key.key_name()) {
             Ok(Some(StateValue::wrap(key, val)?))
         } else {
@@ -54,32 +47,17 @@ impl<R: Runtime> Carcosa<R> {
         }
     }
 
-    pub fn get_state_as<V: DeserializeOwned>(
-        &self,
-        key: StateKey
-    ) -> crate::Result<Option<V>> {
-        if let Some(value) = self.get_state(key)? {
-            Ok(Some(value.resolve()?))
-        } else {
-            Ok(None)
-        }
+    pub fn get_state_as<V: DeserializeOwned>(&self, key: StateKey) -> crate::Result<Option<V>> {
+        if let Some(value) = self.get_state(key)? { Ok(Some(value.resolve()?)) } else { Ok(None) }
     }
 
     pub fn get_state_or(&self, key: StateKey, fallback: StateValue) -> StateValue {
         self.get_state(key).unwrap_or(Some(fallback.clone())).unwrap_or(fallback)
     }
 
-    pub fn get_state_as_or<V: DeserializeOwned>(
-        &self,
-        key: StateKey,
-        fallback: V
-    ) -> V {
+    pub fn get_state_as_or<V: DeserializeOwned>(&self, key: StateKey, fallback: V) -> V {
         if let Ok(opt_val) = self.get_state_as::<V>(key) {
-            if let Some(val) = opt_val {
-                val
-            } else {
-                fallback
-            }
+            if let Some(val) = opt_val { val } else { fallback }
         } else {
             fallback
         }
@@ -130,11 +108,5 @@ impl<R: Runtime> Carcosa<R> {
 
     pub fn events(&self) -> Events<R> {
         Events::new(self.app_handle().clone())
-    }
-}
-
-impl<R: Runtime, T: Manager<R>> CarcosaExt<R> for T {
-    fn carcosa(&self) -> Carcosa<R> {
-        Carcosa::new(self.app_handle().clone())
     }
 }

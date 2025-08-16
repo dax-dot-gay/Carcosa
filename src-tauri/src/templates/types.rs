@@ -254,15 +254,16 @@ pub enum NodeCategory {
 #[derive(Serialize, Deserialize, Clone, Debug, Type, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Identifier(String);
 
-impl From<String> for Identifier {
-    fn from(value: String) -> Self {
-        Self(value)
+impl<T: Into<String>> From<T> for Identifier {
+    fn from(value: T) -> Self {
+        let s: String = value.into();
+        Self(s)
     }
 }
 
-impl Into<String> for Identifier {
-    fn into(self) -> String {
-        self.0
+impl Display for Identifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0)
     }
 }
 
@@ -369,33 +370,6 @@ impl ToKey for PackageId {
 
     fn key_names() -> Vec<String> {
         vec!["PackageId".to_string()]
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, Type)]
-pub struct TemplateMetadata {
-    pub id: Identifier,
-    pub friendly_id: String,
-    pub package: PackageId,
-    pub icon: Option<String>,
-    pub name: String,
-    pub description: Option<String>,
-    pub layout: LayoutKind,
-    pub inherit: Option<Identifier>,
-}
-
-impl From<Template> for TemplateMetadata {
-    fn from(value: Template) -> Self {
-        Self {
-            id: value.id.clone(),
-            friendly_id: value.friendly_id.clone(),
-            package: value.package.clone(),
-            icon: value.icon.clone(),
-            name: value.name.clone(),
-            description: value.description.clone(),
-            layout: value.layout.clone(),
-            inherit: value.inherit.clone()
-        }
     }
 }
 

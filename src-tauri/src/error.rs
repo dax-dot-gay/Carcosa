@@ -4,7 +4,7 @@ use serde::{ Deserialize, Serialize };
 use serde_json::Value;
 use specta::Type;
 
-use crate::templates::ValueType;
+use crate::{ models::Node, templates::{ types::Parent, Identifier, ValueType } };
 
 #[derive(Debug, Serialize, thiserror::Error, Clone)]
 #[serde(into = "SerializableError")]
@@ -22,13 +22,38 @@ pub enum Error {
     #[error("Invalid project selected at path {0}")] InvalidProjectSelection(String),
     #[error("Corrupted project at path {0}: {1}")] CorruptedProject(String, String),
     #[error("Internal tauri error: {0:?}")] TauriError(Arc<tauri::Error>),
-    #[error("Invalid casting attempt: attempted to cast {value_type:?} as type {expected_type}")] InvalidCast {
+    #[error(
+        "Invalid casting attempt: attempted to cast {value_type:?} as type {expected_type}"
+    )] InvalidCast {
         value_type: ValueType,
-        expected_type: String
+        expected_type: String,
     },
-    #[error("Failed to cast provided datatype: expected {value_type:?} but got {value:?}")] InvalidCastDatatype {
+    #[error(
+        "Failed to cast provided datatype: expected {value_type:?} but got {value:?}"
+    )] InvalidCastDatatype {
         value_type: ValueType,
-        value: Value
+        value: Value,
+    },
+    #[error("The current node has no existing parent template: {0:?}")] OrphanedNode(Node),
+    #[error(
+        "The current node references a non-existent linked node: {current:?} -/-> {linked}"
+    )] BrokenNodeLink {
+        current: Node,
+        linked: Identifier,
+    },
+    #[error("Record of type {kind} with id {id} not found!")] NotFound {
+        kind: String,
+        id: Identifier,
+    },
+    #[error("Selected parent {parent:?} in template {id} is non-empty. A link location MUST be specified.")] NonEmptyParent {
+        parent: Parent,
+        id: Identifier
+    }
+}
+
+impl Error {
+    pub fn not_found(kind: impl AsRef<str>, id: impl Into<Identifier>) -> Self {
+        Self::NotFound { kind: kind.as_ref().to_string(), id: id.into() }
     }
 }
 
@@ -84,11 +109,24 @@ pub enum SerializableError {
     TauriError(String),
     InvalidCast {
         value_type: ValueType,
-        expected_type: String
+        expected_type: String,
     },
     InvalidCastDatatype {
         value_type: ValueType,
-        value: Value
+        value: Value,
+    },
+    OrphanedNode(Node),
+    BrokenNodeLink {
+        current: Node,
+        linked: Identifier,
+    },
+    NotFound {
+        kind: String,
+        id: Identifier,
+    },
+    NonEmptyParent {
+        parent: Parent,
+        id: Identifier
     }
 }
 
@@ -105,12 +143,18 @@ impl<T: Into<Error>> From<T> for SerializableError {
             Error::NoActiveProject => Self::NoActiveProject,
             Error::InvalidProjectSelection(path) => Self::InvalidProjectSelection(path),
             Error::CorruptedProject(path, reason) =>
-                        Self::CorruptedProject(
-                            format!("The project at path {path} is corrupted: {reason}")
-                        ),
+                Self::CorruptedProject(
+                    format!("The project at path {path} is corrupted: {reason}")
+                ),
             Error::TauriError(error) => Self::TauriError(error.to_string()),
-            Error::InvalidCast { value_type, expected_type } => Self::InvalidCast { value_type, expected_type },
-            Error::InvalidCastDatatype { value_type, value } => Self::InvalidCastDatatype { value_type, value }
+            Error::InvalidCast { value_type, expected_type } =>
+                Self::InvalidCast { value_type, expected_type },
+            Error::InvalidCastDatatype { value_type, value } =>
+                Self::InvalidCastDatatype { value_type, value },
+            Error::OrphanedNode(node) => Self::OrphanedNode(node),
+            Error::BrokenNodeLink { current, linked } => Self::BrokenNodeLink { current, linked },
+            Error::NotFound { kind, id } => Self::NotFound { kind, id },
+            Error::NonEmptyParent { parent, id } => Self::NonEmptyParent { parent, id }
         }
     }
 }
