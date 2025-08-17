@@ -48,12 +48,22 @@ pub enum Error {
     #[error("Selected parent {parent:?} in template {id} is non-empty. A link location MUST be specified.")] NonEmptyParent {
         parent: Parent,
         id: Identifier
-    }
+    },
+    #[error("Unable to modify immutable field: {0}")] ImmutableFieldModification(String),
+    #[error("Database corruption: {0}")] DatabaseCorruption(String)
 }
 
 impl Error {
     pub fn not_found(kind: impl AsRef<str>, id: impl Into<Identifier>) -> Self {
         Self::NotFound { kind: kind.as_ref().to_string(), id: id.into() }
+    }
+
+    pub fn immutable(field: impl AsRef<str>) -> Self {
+        Self::ImmutableFieldModification(field.as_ref().to_string())
+    }
+
+    pub fn corrupted_db(reason: impl AsRef<str>) -> Self {
+        Self::DatabaseCorruption(reason.as_ref().to_string())
     }
 }
 
@@ -127,7 +137,9 @@ pub enum SerializableError {
     NonEmptyParent {
         parent: Parent,
         id: Identifier
-    }
+    },
+    ImmutableFieldModification(String),
+    DatabaseCorruption(String)
 }
 
 impl<T: Into<Error>> From<T> for SerializableError {
@@ -154,7 +166,9 @@ impl<T: Into<Error>> From<T> for SerializableError {
             Error::OrphanedNode(node) => Self::OrphanedNode(node),
             Error::BrokenNodeLink { current, linked } => Self::BrokenNodeLink { current, linked },
             Error::NotFound { kind, id } => Self::NotFound { kind, id },
-            Error::NonEmptyParent { parent, id } => Self::NonEmptyParent { parent, id }
+            Error::NonEmptyParent { parent, id } => Self::NonEmptyParent { parent, id },
+            Error::ImmutableFieldModification(field) => Self::ImmutableFieldModification(field),
+            Error::DatabaseCorruption(reason) => Self::DatabaseCorruption(reason)
         }
     }
 }

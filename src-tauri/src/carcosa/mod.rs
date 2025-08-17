@@ -6,10 +6,13 @@ use tauri::{ Manager, Runtime };
 pub use application::Application;
 pub use templates::{ Templates, TemplateInterface, Nodes, NodeInterface };
 
+use crate::api::Events;
+
 pub trait CarcosaExt<R: Runtime> {
     fn application(&self) -> Application<R>;
     fn templates(&self) -> Templates<R>;
     fn template_nodes(&self) -> Nodes<R>;
+    fn events(&self) -> Events<R>;
 }
 
 impl<R: Runtime, T: Manager<R>> CarcosaExt<R> for T {
@@ -21,5 +24,9 @@ impl<R: Runtime, T: Manager<R>> CarcosaExt<R> for T {
     }
     fn template_nodes(&self) -> Nodes<R> {
         self.templates().nodes()
+    }
+
+    fn events(&self) -> Events<R> {
+        self.application().events()
     }
 }

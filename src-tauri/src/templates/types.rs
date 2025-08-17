@@ -5,8 +5,6 @@ use serde_json::{ Number, Value };
 use specta::Type;
 use uuid::Uuid;
 
-use crate::{ models::Template, templates::LayoutKind };
-
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
 #[serde(rename_all = "snake_case", tag = "kind")]
 pub enum ValueType {
@@ -243,7 +241,7 @@ impl FromValue for Identifier {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Type)]
+#[derive(Serialize, Deserialize, Clone, Debug, Type, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "snake_case")]
 pub enum NodeCategory {
     Field,
@@ -373,7 +371,7 @@ impl ToKey for PackageId {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Type)]
+#[derive(Serialize, Deserialize, Clone, Debug, Type, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "snake_case", tag = "placement")]
 pub enum Parent {
     Root,

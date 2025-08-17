@@ -207,6 +207,30 @@ impl<R: Runtime> TemplateInterface<R> {
     pub fn nodes(&self) -> crate::Result<HashMap<Identifier, NodeInterface<R>>> {
         self.handle.template_nodes().in_template(self.id.clone())
     }
+
+    pub fn create_node_before(
+        &self,
+        node: NodeDesc,
+        before: impl Into<Identifier>
+    ) -> crate::Result<NodeInterface<R>> {
+        self.handle.template_nodes().create_before(node, self.id.clone(), before)
+    }
+
+    pub fn create_node_after(
+        &self,
+        node: NodeDesc,
+        after: impl Into<Identifier>
+    ) -> crate::Result<NodeInterface<R>> {
+        self.handle.template_nodes().create_after(node, self.id.clone(), after)
+    }
+
+    pub fn create_node_into(
+        &self,
+        node: NodeDesc,
+        into: Parent
+    ) -> crate::Result<NodeInterface<R>> {
+        self.handle.template_nodes().create_into(node, self.id.clone(), into)
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -219,6 +243,47 @@ impl<R: Runtime> Nodes<R> {
 
     fn app(&self) -> Application<R> {
         self.0.application()
+    }
+
+    pub fn create_before(
+        &self,
+        node: NodeDesc,
+        template: impl Into<Identifier>,
+        before: impl Into<Identifier>
+    ) -> crate::Result<NodeInterface<R>> {
+        let before: Identifier = before.into();
+        let template: Identifier = template.into();
+        let new_node = Node::create(template, node);
+        let mut interface = NodeInterface::new(self.0.clone(), new_node);
+        interface.move_before(before)?;
+        Ok(interface)
+    }
+
+    pub fn create_after(
+        &self,
+        node: NodeDesc,
+        template: impl Into<Identifier>,
+        after: impl Into<Identifier>
+    ) -> crate::Result<NodeInterface<R>> {
+        let after: Identifier = after.into();
+        let template: Identifier = template.into();
+        let new_node = Node::create(template, node);
+        let mut interface = NodeInterface::new(self.0.clone(), new_node);
+        interface.move_after(after)?;
+        Ok(interface)
+    }
+
+    pub fn create_into(
+        &self,
+        node: NodeDesc,
+        template: impl Into<Identifier>,
+        parent: Parent
+    ) -> crate::Result<NodeInterface<R>> {
+        let template: Identifier = template.into();
+        let new_node = Node::create(template, node);
+        let mut interface = NodeInterface::new(self.0.clone(), new_node);
+        interface.move_into(parent)?;
+        Ok(interface)
     }
 
     pub fn get(&self, id: impl Into<Identifier>) -> crate::Result<Option<NodeInterface<R>>> {
@@ -297,6 +362,45 @@ impl<R: Runtime> Nodes<R> {
                 .collect()
         )
     }
+
+    pub fn get_children(
+        &self,
+        template: impl Into<Identifier>,
+        parent: Parent
+    ) -> crate::Result<Vec<NodeInterface<R>>> {
+        let template: Identifier = template.into();
+        let mut mapping = (match parent {
+            Parent::Root => self.in_root(template),
+            Parent::Child { parent, collection } => self.in_container(parent, collection),
+        })?;
+
+        if mapping.len() > 0 {
+            let head = mapping
+                .values()
+                .filter_map(|v| if v.node().previous.is_none() { Some(v.clone()) } else { None })
+                .last()
+                .ok_or(
+                    crate::Error::corrupted_db(
+                        "Node/template children exist, but none are the head of the associated linked list."
+                    )
+                )?;
+            let mut results = vec![head];
+            while let Some(next) = results.last().cloned().unwrap().node().next {
+                results.push(
+                    mapping
+                        .remove(&next)
+                        .ok_or(crate::Error::BrokenNodeLink {
+                            current: results.last().cloned().unwrap().node(),
+                            linked: next.clone(),
+                        })?
+                );
+            }
+
+            Ok(results)
+        } else {
+            Ok(Vec::new())
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -340,6 +444,10 @@ impl<R: Runtime> NodeInterface<R> {
 
     pub fn node(&self) -> Node {
         self.node.clone()
+    }
+
+    pub fn desc(&self) -> NodeDesc {
+        self.node.node.clone()
     }
 
     pub fn parent(&self) -> crate::Result<Option<(NodeInterface<R>, String)>> {

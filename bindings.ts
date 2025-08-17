@@ -154,6 +154,11 @@ export type NodeDesc =
     | ({ node_category: "container" } & ContainerNode)
     | ({ node_category: "field" } & FieldNode);
 
+export type NodePlacement =
+    | { after: Identifier }
+    | { before: Identifier }
+    | { into: Parent };
+
 export type NumberField = {
     id: Identifier;
     parent: Parent;
@@ -219,7 +224,16 @@ export type SerializableError =
     | {
           err: "invalid_cast_datatype";
           context: { value_type: ValueType; value: JsonValue };
-      };
+      }
+    | { err: "orphaned_node"; context: Node }
+    | {
+          err: "broken_node_link";
+          context: { current: Node; linked: Identifier };
+      }
+    | { err: "not_found"; context: { kind: string; id: Identifier } }
+    | { err: "non_empty_parent"; context: { parent: Parent; id: Identifier } }
+    | { err: "immutable_field_modification"; context: string }
+    | { err: "database_corruption"; context: string };
 
 export type SingleSelect = {
     id: Identifier;
@@ -279,17 +293,6 @@ export type Template = {
     layout: LayoutKind;
 };
 
-export type TemplateMetadata = {
-    id: Identifier;
-    friendly_id: string;
-    package: PackageId;
-    icon: string | null;
-    name: string;
-    description: string | null;
-    layout: LayoutKind;
-    inherit: Identifier | null;
-};
-
 export type Text = {
     id: Identifier;
     parent: Parent;
@@ -334,7 +337,9 @@ const ARGS_MAP = {
     "application.icons":
         '{"all_icons":[],"icon":["icon"],"icon_categories":[],"icons":["icons"],"icons_in_category":["category"]}',
     templates:
-        '{"all_templates":[],"create_node":["template","node"],"create_template":["model"],"created_template":["template"],"get_template_by_friendly_id":["id"],"get_template_by_uuid":["id"],"package_templates":["pkg"]}',
+        '{"all_templates":[],"create_template":["model"],"created_template":["template"],"get_template_by_friendly_id":["id"],"get_template_by_uuid":["id"],"package_templates":["pkg"]}',
+    "templates.nodes":
+        '{"create_node":["template","placement","node"],"delete_node":["id"],"get_children":["template","parent"],"get_nodes":["template"],"move_node":["id","placement"],"node_created":["template","node"],"node_moved":["template","node"],"node_removed":["template","id"],"node_updated":["template","node"],"update_node":["id","node"]}',
 };
 export type Router = {
     application: {
@@ -365,13 +370,30 @@ export type Router = {
         icons_in_category: (category: string) => Promise<string[] | null>;
     };
     templates: {
-        all_templates: () => Promise<TemplateMetadata[]>;
-        create_node: (template: string, node: NodeDesc) => Promise<Node>;
+        all_templates: () => Promise<Template[]>;
         create_template: (model: CreateTemplateModel) => Promise<Template>;
-        created_template: (template: TemplateMetadata) => Promise<void>;
+        created_template: (template: Template) => Promise<void>;
         get_template_by_friendly_id: (id: string) => Promise<Template | null>;
         get_template_by_uuid: (id: string) => Promise<Template | null>;
-        package_templates: (pkg: PackageId) => Promise<TemplateMetadata[]>;
+        package_templates: (pkg: PackageId) => Promise<Template[]>;
+    };
+    "templates.nodes": {
+        create_node: (
+            template: Identifier,
+            placement: NodePlacement,
+            node: NodeDesc,
+        ) => Promise<Node>;
+        delete_node: (id: Identifier) => Promise<null>;
+        get_children: (template: Identifier, parent: Parent) => Promise<Node[]>;
+        get_nodes: (
+            template: Identifier,
+        ) => Promise<Partial<{ [key in Identifier]: Node }>>;
+        move_node: (id: Identifier, placement: NodePlacement) => Promise<Node>;
+        node_created: (template: Identifier, node: Node) => Promise<void>;
+        node_moved: (template: Identifier, node: Node) => Promise<void>;
+        node_removed: (template: Identifier, id: Identifier) => Promise<void>;
+        node_updated: (template: Identifier, node: Node) => Promise<void>;
+        update_node: (id: Identifier, node: NodeDesc) => Promise<Node>;
     };
 };
 

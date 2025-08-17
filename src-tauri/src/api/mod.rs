@@ -2,7 +2,7 @@ use moka::future::Cache;
 use tauri::{AppHandle, Runtime};
 use taurpc::Router;
 
-use crate::{api::{application::{ApplicationApi, ApplicationEventTrigger, ApplicationIconsApi}, templates::{TemplateApi, TemplateEventTrigger}}, SerializableError};
+use crate::{api::{application::{ApplicationApi, ApplicationEventTrigger, ApplicationIconsApi}, templates::{TemplateApi, TemplateEventTrigger, NodeApi, NodeEventTrigger}}, SerializableError};
 
 pub mod application;
 pub mod templates;
@@ -16,8 +16,9 @@ pub fn router<R: Runtime>() -> Router<R> {
                 .formatter(specta_typescript::formatter::prettier)
         )
         .merge(application::ApplicationApiImpl.into_handler())
-        .merge(templates::TemplateApiImpl.into_handler())
         .merge(application::ApplicationIconsApiImpl(Cache::new(10000)).into_handler())
+        .merge(templates::TemplateApiImpl.into_handler())
+        .merge(templates::NodeApiImpl.into_handler())
 }
 
 #[derive(Clone, Debug)]
@@ -34,6 +35,10 @@ impl<R: Runtime> Events<R> {
 
     pub fn templates(&self) -> TemplateEventTrigger<R> {
         TemplateEventTrigger::new(self.0.clone())
+    }
+
+    pub fn nodes(&self) -> NodeEventTrigger<R> {
+        NodeEventTrigger::new(self.0.clone())
     }
 }
 
