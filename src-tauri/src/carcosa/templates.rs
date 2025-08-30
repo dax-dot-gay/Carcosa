@@ -1,7 +1,7 @@
 use std::{ collections::HashMap, ops::{ Deref, DerefMut } };
 
 use convert_case::{ Case, Casing };
-use native_db::{ transaction::RwTransaction, ToKey };
+use native_db::transaction::RwTransaction;
 use tauri::{ AppHandle, Runtime };
 
 use crate::{
@@ -103,7 +103,7 @@ impl<R: Runtime> Templates<R> {
         let results = txn
             .scan()
             .secondary::<Template>(TemplateKey::package)?
-            .range(package_id.to_key()..=package_id.to_key())?
+            .start_with(package_id)?
             .filter_map(|r| r.ok().and_then(|o| Some(TemplateInterface::new(self.handle(), o))))
             .collect();
         Ok(results)
@@ -119,7 +119,7 @@ impl<R: Runtime> Templates<R> {
         let results = txn
             .scan()
             .secondary::<Template>(TemplateKey::inherit)?
-            .range(inherit_key.to_key()..=inherit_key.to_key())?
+            .start_with(inherit_key)?
             .filter_map(|r| r.ok().and_then(|o| Some(TemplateInterface::new(self.handle(), o))))
             .collect();
         Ok(results)
@@ -131,7 +131,7 @@ impl<R: Runtime> Templates<R> {
         let results = txn
             .scan()
             .secondary::<Template>(TemplateKey::inherit)?
-            .range(layout.to_key()..=layout.to_key())?
+            .start_with(layout)?
             .filter_map(|r| r.ok().and_then(|o| Some(TemplateInterface::new(self.handle(), o))))
             .collect();
         Ok(results)

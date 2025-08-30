@@ -68,6 +68,22 @@ impl TemplateContainer for Columns {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Type)]
+pub struct FlexibleRow {
+    pub id: Identifier,
+    pub parent: Parent,
+    pub previous: Option<Identifier>,
+    pub next: Option<Identifier>
+}
+
+impl_node!(FlexibleRow, "flexible_row");
+
+impl TemplateContainer for FlexibleRow {
+    fn collections(&self) -> Vec<String> {
+        vec!["children".to_string()]
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct Collapsible {
     pub id: Identifier,
 
@@ -137,6 +153,7 @@ pub enum ContainerNode {
     Collapsible(Collapsible),
     LabelledGroup(LabelledGroup),
     Wrapper(Wrapper),
+    FlexibleRow(FlexibleRow)
 }
 
 #[delegate_impl]

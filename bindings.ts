@@ -42,7 +42,8 @@ export type ContainerNode =
     | ({ node_kind: "columns" } & Columns)
     | ({ node_kind: "collapsible" } & Collapsible)
     | ({ node_kind: "labelled_group" } & LabelledGroup)
-    | ({ node_kind: "wrapper" } & Wrapper);
+    | ({ node_kind: "wrapper" } & Wrapper)
+    | ({ node_kind: "flexible_row" } & FlexibleRow);
 
 export type CreateProjectModel = {
     path: string;
@@ -67,6 +68,13 @@ export type FieldNode =
     | ({ node_kind: "rich_text" } & RichText)
     | ({ node_kind: "linked_document" } & LinkedDocument)
     | ({ node_kind: "multi_linked_documents" } & MultiLinkedDocuments);
+
+export type FlexibleRow = {
+    id: Identifier;
+    parent: Parent;
+    previous: Identifier | null;
+    next: Identifier | null;
+};
 
 export type Identifier = string;
 

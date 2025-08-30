@@ -166,5 +166,39 @@
     "ti": "Typicons",
     "vsc": "VS Code Icons",
     "wi": "Weather Icons"
+  },
+  "templates": {
+    "edit": {
+      "addNode": "Add Node"
+    },
+    "nodes": {
+      "other": {
+        "self": "Informational",
+        "selfPlural": "Informational",
+        "text": "Static Text",
+        "alert": "Alert"
+      },
+      "container": {
+        "self": "Container",
+        "selfPlural": "Containers",
+        "collapsible": "Collapsible",
+        "columns": "Columns",
+        "flexible_row": "Flexible Row",
+        "labelled_group": "Labelled Group",
+        "wrapper": "Wrapper"
+      },
+      "field": {
+        "self": "Form Field",
+        "selfPlural": "Form Fields",
+        "linked_document": "Document Selector",
+        "multi_linked_documents": "Multiple Document Selector",
+        "multi_select": "Multi-Select",
+        "number_field": "Number Input",
+        "rich_text": "Rich Text Editor",
+        "single_select": "Single Select",
+        "switch": "On/Off Switch",
+        "text_field": "Text Input"
+      }
+    }
   }
 }

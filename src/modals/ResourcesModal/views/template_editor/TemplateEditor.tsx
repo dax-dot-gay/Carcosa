@@ -1,6 +1,7 @@
 import api, { SerializableError, Template, writeError } from "@/api";
 import { IconSelector } from "@/components/DynamicIcons";
 import { useParams } from "@/context/routing";
+import { NodePicker } from "@/templates/NodePicker";
 import {
     Alert,
     Box,
@@ -84,7 +85,9 @@ function TemplateEditorInterface({
                     px="sm"
                     className="rm-view template-editor-scroll"
                 >
-                    <Box py="sm" className="rm-view template-editor-box"></Box>
+                    <Box py="sm" className="rm-view template-editor-box">
+                        <NodePicker size="sm" onPick={console.log} />
+                    </Box>
                 </ScrollArea>
             </Box>
             <Group gap="sm" justify="space-between" p="sm" wrap="nowrap" pt={0}>
