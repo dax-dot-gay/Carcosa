@@ -2,7 +2,6 @@
 name = "carcosa"
 version = "0.1.0"
 description = "A Tauri App"
-authors = ["you"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -15,11 +14,27 @@ name = "carcosa_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = { workspace = true, features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
-tauri-plugin-opener = "2"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+tauri = { workspace = true, features = [] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+specta = { workspace = true, features = ["chrono", "derive", "export", "function", "serde", "serde_json", "tokio", "uuid"] }
+chrono = { workspace = true, features = ["serde"] }
+uuid = { workspace = true, features = ["serde", "v4", "fast-rng"] }
+specta-typescript = { workspace = true }
+parking_lot = { workspace = true, features = ["serde", "arc_lock", "send_guard"] }
+tokio = { workspace = true, features = ["full"] }
+native_db = { workspace = true, features = ["tokio"] }
+native_model = { workspace = true }
+bon = { workspace = true }
+getset = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tauri-plugin-fs = { workspace = true }
+tauri-plugin-dialog = { workspace = true }
+taurpc = { workspace = true }
+axum = { workspace = true }
+platform-dirs = { workspace = true }
 
