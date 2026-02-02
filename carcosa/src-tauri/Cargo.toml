@@ -26,8 +26,6 @@ uuid = { workspace = true, features = ["serde", "v4", "fast-rng"] }
 specta-typescript = { workspace = true }
 parking_lot = { workspace = true, features = ["serde", "arc_lock", "send_guard"] }
 tokio = { workspace = true, features = ["full"] }
-native_db = { workspace = true, features = ["tokio"] }
-native_model = { workspace = true }
 bon = { workspace = true }
 getset = { workspace = true }
 thiserror = { workspace = true }
@@ -37,4 +35,8 @@ tauri-plugin-dialog = { workspace = true }
 taurpc = { workspace = true }
 axum = { workspace = true }
 platform-dirs = { workspace = true }
+redb = { workspace = true, features = ["uuid", "chrono_v0_4", "logging"] }
+log = { workspace = true, features = ["serde", "kv_serde"] }
+fern = { workspace = true, features = ["chrono", "colored"] }
+tauri-plugin-persisted-scope = "2"
 
