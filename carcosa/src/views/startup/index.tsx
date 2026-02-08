@@ -11,6 +11,7 @@ import {
 } from "@mantine/core";
 import {
     TbBook2,
+    TbCircleXFilled,
     TbFolderOpen,
     TbLink,
     TbPlugConnected,
@@ -18,9 +19,13 @@ import {
 } from "react-icons/tb";
 import { useInputState } from "@mantine/hooks";
 import { openModal } from "../../util/modals";
+import { useIpc } from "../../util/api";
+import { notifications } from "@mantine/notifications";
+import { modals } from "@mantine/modals";
 
 export function StartupView() {
     const [remoteAddr, setRemoteAddr] = useInputState("");
+    const ipc = useIpc();
     return (
         <Center w="100vw" h="100vh">
             <Stack gap="lg" align="center" w="min(calc(100% - 64px), 384px)">
@@ -39,7 +44,25 @@ export function StartupView() {
                         justify="space-between"
                         onClick={() =>
                             openModal("create_project", {
-                                onSubmit: console.log,
+                                onSubmit(id, name, path) {
+                                    ipc.projects
+                                        .create_project(name, path)
+                                        .resolve((result) => {
+                                            if (result.success) {
+                                                modals.close(id);
+                                            } else {
+                                                console.log(
+                                                    `ipc_error: ${result.error} - "${result.message}"`,
+                                                );
+                                                notifications.show({
+                                                    color: "red",
+                                                    title: "Failed to create project!",
+                                                    message: result.message,
+                                                    icon: <TbCircleXFilled />,
+                                                });
+                                            }
+                                        });
+                                },
                             })
                         }
                     >

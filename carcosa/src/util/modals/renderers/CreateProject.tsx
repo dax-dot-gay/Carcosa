@@ -11,18 +11,26 @@ function CreateProjectModal({
     context,
     onSubmit,
 }: ModalRendererProps<{
-    onSubmit: (name: string, path: string) => void;
+    onSubmit: (id: string, name: string, path: string) => void;
 }>) {
     const createForm = useForm({
         initialValues: {
             name: "",
             path: "",
         },
+        validate: {
+            name: (value) =>
+                value.length > 256
+                    ? "Name is too long (max. 256)"
+                    : value.includes("\\") || value.includes("/")
+                      ? "Name contains illegal characters"
+                      : null,
+        },
     });
     return (
         <form
             onSubmit={createForm.onSubmit(({ name, path }) =>
-                onSubmit(name, path),
+                onSubmit(id, name, path),
             )}
         >
             <Stack gap="sm" w="100%">

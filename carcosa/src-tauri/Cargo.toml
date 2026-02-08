@@ -27,7 +27,7 @@ specta-typescript = { workspace = true }
 parking_lot = { workspace = true, features = ["serde", "arc_lock", "send_guard"] }
 tokio = { workspace = true, features = ["full"] }
 bon = { workspace = true }
-getset = { workspace = true }
+getset.workspace = true
 thiserror = { workspace = true }
 anyhow = { workspace = true }
 tauri-plugin-fs = { workspace = true }
@@ -41,4 +41,8 @@ fern = { workspace = true, features = ["chrono", "colored"] }
 tauri-plugin-persisted-scope = "2"
 yrs = "0.25.0"
 iroh = "0.96.1"
+async-trait = "0.1.89"
+strum = { version = "0.27.2", features = ["derive"] }
+base64 = "0.22.1"
+rand = { version = "^0.9.2", features = ["serde"] }
 
