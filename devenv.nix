@@ -35,7 +35,7 @@
             pane split_direction="vertical"  {
                 pane {
                     command "nixGL"
-                    args "pnpm" "tauri" "dev"
+                    args "pnpm" "tauri" "dev" "--no-watch"
                     cwd "carcosa"
                 }
                 pane focus=true cwd="carcosa"

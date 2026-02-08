@@ -39,4 +39,6 @@ redb = { workspace = true, features = ["uuid", "chrono_v0_4", "logging"] }
 log = { workspace = true, features = ["serde", "kv_serde"] }
 fern = { workspace = true, features = ["chrono", "colored"] }
 tauri-plugin-persisted-scope = "2"
+yrs = "0.25.0"
+iroh = "0.96.1"
 

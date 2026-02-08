@@ -1,0 +1,13 @@
+.context-modal {
+    &.modal-create_project {
+        .path-input {
+            .mantine-Input-wrapper,.mantine-Input-input {
+                cursor: pointer !important;
+
+                &.mantine-Input-input:hover {
+                    background-color: var(--mantine-color-default-hover);
+                }
+            }
+        }
+    }
+}

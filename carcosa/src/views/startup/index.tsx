@@ -1,23 +1,47 @@
-import { Button, Center, Divider, Group, Stack, Title } from "@mantine/core";
-import { TbBook2, TbFolderOpen, TbPlus } from "react-icons/tb";
+import {
+    ActionIcon,
+    Button,
+    Center,
+    Divider,
+    Group,
+    Stack,
+    TextInput,
+    Title,
+    Tooltip,
+} from "@mantine/core";
+import {
+    TbBook2,
+    TbFolderOpen,
+    TbLink,
+    TbPlugConnected,
+    TbPlus,
+} from "react-icons/tb";
+import { useInputState } from "@mantine/hooks";
+import { openModal } from "../../util/modals";
 
 export function StartupView() {
+    const [remoteAddr, setRemoteAddr] = useInputState("");
     return (
         <Center w="100vw" h="100vh">
-            <Stack gap="lg" align="center" w="min(calc(100% - 64px), 256px)">
-                <Group gap="sm" w="100%">
+            <Stack gap="lg" align="center" w="min(calc(100% - 64px), 384px)">
+                <Group gap="sm" w="100%" justify="space-between">
                     <TbBook2 size={36} />
-                    <Divider style={{ flexGrow: 1 }} />
                     <Title order={1} fw={400} ff="monospace">
                         Carcosa
                     </Title>
                 </Group>
+                <Divider w="100%" />
                 <Stack gap="sm" align="center" w="100%">
                     <Button
                         fullWidth
                         leftSection={<TbPlus size={24} />}
                         size="lg"
                         justify="space-between"
+                        onClick={() =>
+                            openModal("create_project", {
+                                onSubmit: console.log,
+                            })
+                        }
                     >
                         New Project
                     </Button>
@@ -29,6 +53,27 @@ export function StartupView() {
                     >
                         Open Project
                     </Button>
+                    <Group gap="sm" wrap="nowrap" w="100%">
+                        <TextInput
+                            size="md"
+                            leftSection={<TbLink size={20} />}
+                            placeholder="Remote Host Address"
+                            style={{ flexGrow: 1 }}
+                            value={remoteAddr}
+                            onChange={setRemoteAddr}
+                        />
+                        <Tooltip
+                            label="Connect to a remote host"
+                            position="bottom-end"
+                        >
+                            <ActionIcon
+                                size="40"
+                                disabled={remoteAddr.length === 0}
+                            >
+                                <TbPlugConnected size={24} />
+                            </ActionIcon>
+                        </Tooltip>
+                    </Group>
                 </Stack>
             </Stack>
         </Center>
