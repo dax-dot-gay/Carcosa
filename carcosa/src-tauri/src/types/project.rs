@@ -2,10 +2,11 @@ use std::{collections::HashMap, fs, path::Path};
 
 use getset::{CloneGetters, WithSetters};
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 use crate::types::{NetworkIdentity, PeerIdentity};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Type)]
 pub struct ProjectCollaborator {
     pub identity: PeerIdentity,
     pub name: String,
@@ -14,7 +15,7 @@ pub struct ProjectCollaborator {
     pub can_edit: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, CloneGetters, WithSetters)]
+#[derive(Serialize, Deserialize, Clone, Debug, CloneGetters, WithSetters, Type)]
 #[getset(get_clone = "pub")]
 pub struct ProjectSettings {
     #[getset(set_with = "pub")]

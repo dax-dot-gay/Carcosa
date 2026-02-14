@@ -22,7 +22,7 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 specta = { workspace = true, features = ["chrono", "derive", "export", "function", "serde", "serde_json", "tokio", "uuid"] }
 chrono = { workspace = true, features = ["serde"] }
-uuid = { workspace = true, features = ["serde", "v4", "fast-rng"] }
+uuid = { workspace = true, features = ["serde", "v4", "fast-rng", "v7"] }
 specta-typescript = { workspace = true }
 parking_lot = { workspace = true, features = ["serde", "arc_lock", "send_guard"] }
 tokio = { workspace = true, features = ["full"] }

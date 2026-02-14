@@ -35,6 +35,10 @@ pub enum Error {
     #[error("JSON encoding/decoding error: {0:?}")]
     #[strum(props(code = "validation.json"))]
     JsonDecode(#[from] serde_json::error::Error),
+
+    #[error("Tauri framework error: {0:?}")]
+    #[strum(props(code = "sys.tauri"))]
+    Tauri(#[from] tauri::Error)
 }
 
 macro_rules! db_errs {

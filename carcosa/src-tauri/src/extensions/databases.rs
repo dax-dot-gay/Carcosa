@@ -208,6 +208,8 @@ pub trait DatabasesExt<R: Runtime> {
     ) -> crate::Result<Database>;
     fn get_database(&self, name: impl Into<String>) -> Option<Database>;
     fn close_database(&self, name: impl Into<String>) -> ();
+    fn clear_databases(&self) -> ();
+    fn list_databases(&self) -> Vec<String>;
 }
 
 impl<R: Runtime, T: Manager<R>> DatabasesExt<R> for T {
@@ -249,5 +251,17 @@ impl<R: Runtime, T: Manager<R>> DatabasesExt<R> for T {
         let state = self.database_state();
         let mut registry = state.write();
         let _ = registry.remove(&name);
+    }
+
+    fn clear_databases(&self) -> () {
+        let state = self.database_state();
+        let mut registry = state.write();
+        registry.clear();
+    }
+
+    fn list_databases(&self) -> Vec<String> {
+        let state = self.database_state();
+        let state_map = state.read();
+        state_map.keys().cloned().collect()
     }
 }

@@ -1,10 +1,17 @@
 use base64::prelude::*;
 use iroh::{PublicKey, SecretKey, Signature, SignatureError};
 use serde::{Deserialize, Serialize};
+use specta::Type;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(try_from = "String", into = "String")]
 pub struct NetworkIdentity(SecretKey);
+
+impl Type for NetworkIdentity {
+    fn inline(type_map: &mut specta::TypeCollection, generics: specta::Generics) -> specta::datatype::DataType {
+        String::inline(type_map, generics)
+    }
+}
 
 impl From<SecretKey> for NetworkIdentity {
     fn from(value: SecretKey) -> Self {
@@ -59,6 +66,12 @@ impl NetworkIdentity {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[serde(try_from = "String", into = "String")]
 pub struct PeerIdentity(PublicKey);
+
+impl Type for PeerIdentity {
+    fn inline(type_map: &mut specta::TypeCollection, generics: specta::Generics) -> specta::datatype::DataType {
+        String::inline(type_map, generics)
+    }
+}
 
 impl PeerIdentity {
     pub fn into_inner(self) -> PublicKey {

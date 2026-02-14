@@ -4,10 +4,21 @@ import { createTauRPCProxy as createProxy, type InferCommandOutput } from 'taurp
 type TAURI_CHANNEL<T> = (response: T) => void
 
 
+export type ActiveProject = { kind: "none" } | { kind: "local"; path: string }
+
+export type AppEvent = { event: "activated_project"; project: ActiveProject }
+
 export type MetaError = { code: string; message: string }
 
-const ARGS_MAP = { 'projects':'{"create_project":["name","path"]}' }
-export type Router = { "projects": {create_project: (name: string, path: string) => Promise<string>} };
+export type ProjectCollaborator = { identity: string; name: string; can_edit?: boolean }
+
+export type ProjectSettings = { name: string; identity?: string; collaborators?: Partial<{ [key in string]: ProjectCollaborator }> }
+
+const ARGS_MAP = { '':'{"app_event":["id","event"]}', 'projects':'{"create_project":["name","path"],"current_project":[],"open_local_project":["path"]}' }
+export type Router = { "": {app_event: (id: string, event: AppEvent) => Promise<void>},
+"projects": {create_project: (name: string, path: string) => Promise<string>, 
+current_project: () => Promise<[ActiveProject, ProjectSettings] | null>, 
+open_local_project: (path: string) => Promise<ProjectSettings>} };
 
 
 export const createTauRPCProxy = () => createProxy<Router>(ARGS_MAP)
